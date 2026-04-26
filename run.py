@@ -1,13 +1,18 @@
-# This is a sample Python script.
+from fastapi import FastAPI, File, UploadFile
+from services.disease_service import predict_disease
+from services.weather_service import get_weather
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-#aryan patidar
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+app = FastAPI()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+@app.get("/")
+def home():
+    return {"message": "Smart Agriculture API Running"}
+
+@app.post("/predict-disease")
+async def disease(file: UploadFile = File(...)):
+    result = await predict_disease(file)
+    return result
+
+@app.get("/weather")
+def weather(city: str):
+    return get_weather(city)
