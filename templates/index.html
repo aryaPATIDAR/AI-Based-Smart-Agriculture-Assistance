@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Agriculture</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🌾 SmartAgro</h2>
+    <div>
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/disease">Disease</a>
+        <a href="/weather">Weather</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <h1>Smart Agriculture System</h1>
+    <p>AI-based farming solutions for better yield</p>
+    <a href="/dashboard" class="btn">Get Started</a>
+</section>
+
+<section class="features">
+    <div class="card">🌱 Crop Monitoring</div>
+    <div class="card">💧 Smart Irrigation</div>
+    <div class="card">📊 Yield Prediction</div>
+</section>
+<h1>📊 Dashboard</h1>
+
+<div class="grid">
+    <div class="box">Crop: {{ data.crop }}</div>
+    <div class="box">Status: {{ data.status }}</div>
+    <div class="box">Moisture: {{ data.moisture }}</div>
+    <div class="box">Temperature: {{ data.temperature }}</div>
+</div>
+</body>
+</html>

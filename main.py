@@ -1,23 +1,44 @@
-from fastapi import FastAPI, File, UploadFile
-from services.disease_service import predict_disease
-from services.weather_service import get_weather
-import uvicorn
+from flask import Flask, render_template
 
-app = FastAPI()
+app = Flask(__name__)
 
-@app.get("/")
+# 🏠 Home Page
+@app.route("/")
 def home():
-    return {"message": "Smart Agriculture API Running"}
+    data = {
+        "crop": "Wheat",
+        "status": "Healthy",
+        "moisture": "70%",
+        "temperature": "28°C"
+    }
+    return render_template("index.html", data=data)
 
-@app.post("/predict-disease")
-async def disease(file: UploadFile = File(...)):
-    result = await predict_disease(file)
-    return result
 
-@app.get("/weather")
 
-def weather(city: str):
-    return get_weather(city)
+
+# 🌱 Disease Prediction Page
+@app.route("/disease")
+def disease():
+    return render_template("disease.html")
+
+
+# 🌦 Weather Page
+@app.route("/weather")
+def weather():
+    return render_template("weather.html")
+
+
+# 👨‍🌾 Farmer Page
+@app.route("/farmer")
+def farmer():
+    return render_template("farmer.html")
+
+
+# 🛒 Trader Page
+@app.route("/trader")
+def trader():
+    return render_template("trader.html")
+
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    app.run(debug=True)
