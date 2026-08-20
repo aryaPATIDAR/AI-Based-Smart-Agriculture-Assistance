@@ -1,39 +1,952 @@
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="hi">
 <head>
     <title>Smart Agriculture</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* ── AUTH POPUP OVERLAY ── */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(3px);
+        }
+        .popup-overlay.hidden { display: none; }
+
+        .popup-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 36px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .popup-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .popup-logo-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: #1d9e75; display: flex; align-items: center;
+            justify-content: center; color: white; font-size: 22px;
+        }
+        .popup-logo-text { font-size: 20px; font-weight: 700; color: #111; }
+        .popup-logo-text span { color: #1d9e75; }
+
+        .popup-step { display: none; }
+        .popup-step.active { display: block; }
+
+        .popup h2 { font-size: 17px; font-weight: 600; color: #111; text-align: center; margin-bottom: 6px; }
+        .popup-sub { font-size: 13px; color: #555; text-align: center; margin-bottom: 24px; }
+
+        .p-role-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+        .p-role-btn {
+            border: 1.5px solid #ddd; border-radius: 14px; padding: 18px 12px;
+            cursor: pointer; background: #fff; transition: all 0.15s;
+            text-align: center; display: flex; flex-direction: column;
+            align-items: center; gap: 8px;
+        }
+        .p-role-btn:hover { border-color: #1d9e75; background: #f0faf6; }
+        .p-role-btn.active { border: 2px solid #1d9e75; background: #f0faf6; }
+        .p-role-btn i { font-size: 30px; color: #1d9e75; }
+        .p-role-btn .rl { font-size: 15px; font-weight: 600; color: #111; }
+        .p-role-btn .rs { font-size: 11px; color: #777; }
+
+        .p-tabs {
+            display: flex; border: 1px solid #ddd;
+            border-radius: 10px; overflow: hidden; margin-bottom: 20px;
+        }
+        .p-tab {
+            flex: 1; padding: 10px; font-size: 13px; font-weight: 500;
+            cursor: pointer; background: transparent; border: none;
+            color: #555; transition: 0.15s; font-family: 'Segoe UI', sans-serif;
+        }
+        .p-tab.active { background: #1d9e75; color: white; font-weight: 600; }
+
+        .p-field { margin-bottom: 14px; }
+        .p-field label { font-size: 12px; color: #555; display: block; margin-bottom: 5px; font-weight: 500; }
+        .p-field input, .p-field select {
+            width: 100%; padding: 10px 14px; border: 1px solid #ddd;
+            border-radius: 9px; font-size: 14px; color: #111;
+            background: #fff; outline: none; transition: border 0.15s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .p-field input:focus, .p-field select:focus { border-color: #1d9e75; }
+        .p-field select:disabled { background: #f5f5f5; color: #aaa; }
+
+        .p-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .p-btn {
+            width: 100%; padding: 12px; background: #1d9e75; color: white;
+            border: none; border-radius: 9px; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: 0.15s; margin-top: 4px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .p-btn:hover { background: #0f6e56; }
+        .p-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+        .p-switch { text-align: center; margin-top: 12px; font-size: 12px; color: #555; }
+        .p-switch span { color: #1d9e75; cursor: pointer; font-weight: 500; }
+
+        .p-otp-inputs { display: flex; gap: 10px; justify-content: center; margin: 20px 0 16px; }
+        .p-otp-inputs input {
+            width: 50px; height: 54px; text-align: center; font-size: 22px;
+            font-weight: 700; border: 1.5px solid #ddd; border-radius: 10px;
+            color: #111; outline: none; transition: border 0.15s;
+        }
+        .p-otp-inputs input:focus { border-color: #1d9e75; }
+
+        .p-dev-otp {
+            background: #fff8e1; border: 1px solid #ffe082; border-radius: 9px;
+            padding: 10px 14px; font-size: 13px; color: #555;
+            text-align: center; margin-bottom: 8px;
+        }
+        .p-dev-otp strong { color: #1d9e75; font-size: 18px; letter-spacing: 4px; }
+
+        .p-resend { font-size: 12px; color: #555; text-align: center; margin-bottom: 16px; }
+        .p-resend span { color: #1d9e75; cursor: pointer; font-weight: 500; }
+
+        .p-error {
+            background: #fce4ec; border: 1px solid #f48fb1; border-radius: 9px;
+            padding: 10px 14px; font-size: 13px; color: #c62828;
+            margin-bottom: 14px; display: none;
+        }
+        .p-success-msg {
+            background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 9px;
+            padding: 10px 14px; font-size: 13px; color: #2e7d32;
+            margin-bottom: 14px; display: none;
+        }
+
+        .p-id-row { display: flex; gap: 8px; }
+        .p-id-row input { flex: 1; }
+        .p-id-check-btn {
+            padding: 10px 14px; background: #1d9e75; color: white;
+            border: none; border-radius: 9px; font-size: 13px; font-weight: 600;
+            cursor: pointer; white-space: nowrap; font-family: 'Segoe UI', sans-serif;
+        }
+        .p-id-check-btn:hover { background: #0f6e56; }
+
+        .p-success-box { text-align: center; padding: 16px 0; }
+        .p-success-box i { font-size: 52px; color: #1d9e75; display: block; margin-bottom: 14px; }
+        .p-success-id {
+            background: #f0faf6; border: 1px solid #b2ddd1; border-radius: 9px;
+            padding: 10px 14px; font-size: 13px; color: #555;
+            display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+        }
+        .p-success-id span { color: #1d9e75; font-weight: 700; font-size: 16px; }
+
+        .p-back { text-align: center; margin-top: 12px; font-size: 12px; color: #1d9e75; cursor: pointer; }
+
+        .p-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
+        .p-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; transition: 0.2s; }
+        .p-dot.active { background: #1d9e75; width: 20px; border-radius: 4px; }
+
+        /* Navbar logged in state */
+        .nav-user {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .nav-user-id {
+            font-size: 13px; font-weight: 600; color: #1d9e75;
+            background: #e8f5f0; padding: 6px 12px; border-radius: 8px;
+        }
+        .nav-logout {
+            font-size: 13px; color: #ffffff; cursor: pointer;
+            padding: 6px 12px; border-radius: 8px;
+            border: 1px solid #ddd; text-decoration: none;
+            transition: 0.15s;
+        }
+        .nav-logout:hover { background: #fce4ec; color: #c62828; border-color: #f48fb1; }
+
+        @media (max-width: 480px) {
+            .popup-card { padding: 24px 16px; }
+            .p-otp-inputs input { width: 42px; height: 46px; font-size: 18px; }
+        }
+        @media (max-width: 768px) {
+    .nav-actions {
+        display: none;
+    }
+}
+    </style>
 </head>
 <body>
 
+<!-- ═══════════════════════════════════
+     AUTH POPUP
+═══════════════════════════════════ -->
+<div class="popup-overlay hidden" id="authPopup">
+<div class="popup-card">
+
+    <div class="popup-logo">
+        <div class="popup-logo-icon"><i class="ti ti-plant-2"></i></div>
+        <div class="popup-logo-text">Kisan<span>Smart</span></div>
+    </div>
+
+    <!-- STEP 1: Role -->
+    <div class="popup-step active" id="ps1">
+        <h2>Aap kaun hain?</h2>
+        <p class="popup-sub">Pehle apni bhumika chunein</p>
+        <div class="p-role-row">
+            <div class="p-role-btn" id="pr-kisan" onclick="pSelectRole('kisan')">
+                <i class="ti ti-tractor"></i>
+                <div class="rl">Kisan</div>
+                <div class="rs">Farmer</div>
+            </div>
+            <div class="p-role-btn" id="pr-vyapari" onclick="pSelectRole('vyapari')">
+                <i class="ti ti-building-store"></i>
+                <div class="rl">Vyapari</div>
+                <div class="rs">Trader</div>
+            </div>
+        </div>
+        <button class="p-btn" id="pNextBtn" onclick="pGoStep2()" disabled>Aage Badhein →</button>
+    </div>
+
+    <!-- STEP 2: Login / Register -->
+    <div class="popup-step" id="ps2">
+        <div class="p-dots">
+            <div class="p-dot"></div><div class="p-dot active"></div>
+            <div class="p-dot"></div><div class="p-dot"></div>
+        </div>
+        <div class="p-tabs">
+            <button class="p-tab active" id="ptab-login" onclick="pSwitchTab('login')">Login</button>
+            <button class="p-tab" id="ptab-register" onclick="pSwitchTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="pLoginForm">
+            <h2>Welcome Back!</h2>
+            <p class="popup-sub">Mobile number se OTP bhejenge</p>
+            <div class="p-error" id="pLoginError"></div>
+            <div class="p-field">
+                <label>Mobile Number</label>
+                <input type="tel" id="pLoginMobile" maxlength="10" placeholder="10-digit mobile number">
+            </div>
+            <button class="p-btn" onclick="pSendOtp('login')">OTP Bhejo →</button>
+            <div class="p-switch">Account nahi hai? <span onclick="pSwitchTab('register')">Register karein</span></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="pRegisterForm" style="display:none">
+            <h2>Naya Account</h2>
+            <p class="popup-sub">Apni jankari bharein</p>
+            <div class="p-error" id="pRegError"></div>
+            <div class="p-row2">
+                <div class="p-field"><label>Pehla Naam *</label><input type="text" id="pFname" placeholder="Ramesh"></div>
+                <div class="p-field"><label>Surname *</label><input type="text" id="pLname" placeholder="Yadav"></div>
+            </div>
+            <div class="p-field">
+                <label>Mobile Number *</label>
+                <input type="tel" id="pRegMobile" maxlength="10" placeholder="10-digit mobile">
+            </div>
+            <div class="p-field">
+                <label>State *</label>
+                <select id="pState" onchange="pLoadDistricts()">
+                    <option value="">-- State Chunein --</option>
+                    <option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                    <option>Assam</option><option>Bihar</option>
+                    <option>Chhattisgarh</option><option>Goa</option>
+                    <option>Gujarat</option><option>Haryana</option>
+                    <option>Himachal Pradesh</option><option>Jharkhand</option>
+                    <option>Karnataka</option><option>Kerala</option>
+                    <option>Madhya Pradesh</option><option>Maharashtra</option>
+                    <option>Manipur</option><option>Meghalaya</option>
+                    <option>Mizoram</option><option>Nagaland</option>
+                    <option>Odisha</option><option>Punjab</option>
+                    <option>Rajasthan</option><option>Sikkim</option>
+                    <option>Tamil Nadu</option><option>Telangana</option>
+                    <option>Tripura</option><option>Uttar Pradesh</option>
+                    <option>Uttarakhand</option><option>West Bengal</option>
+                    <option>Delhi</option><option>Jammu and Kashmir</option>
+                    <option>Ladakh</option><option>Other</option>
+                </select>
+            </div>
+            <div class="p-field">
+                <label>District *</label>
+                <select id="pDistrict" disabled>
+                    <option value="">-- Pehle State Chunein --</option>
+                </select>
+            </div>
+            <div class="p-field">
+                <label>Village / Town</label>
+                <input type="text" id="pVillage" placeholder="Apna gaon ya shahar likhein">
+            </div>
+            <div class="p-field">
+                <label>Ling (Gender) *</label>
+                <select id="pGender">
+                    <option value="">Chunein</option>
+                    <option value="male">Purush (Male)</option>
+                    <option value="female">Mahila (Female)</option>
+                    <option value="other">Anya (Other)</option>
+                </select>
+            </div>
+            <button class="p-btn" onclick="pSendOtp('register')">OTP Bhejo →</button>
+            <div class="p-switch">Pehle se account hai? <span onclick="pSwitchTab('login')">Login karein</span></div>
+        </div>
+    </div>
+
+    <!-- STEP 3: OTP -->
+    <div class="popup-step" id="ps3">
+        <div class="p-dots">
+            <div class="p-dot"></div><div class="p-dot"></div>
+            <div class="p-dot active"></div><div class="p-dot"></div>
+        </div>
+        <h2>OTP Enter Karein</h2>
+        <p class="popup-sub" id="pOtpSub">Aapke number par OTP bheja gaya</p>
+        <div class="p-dev-otp">Development OTP: <strong id="pDevOtp">------</strong></div>
+        <div class="p-otp-inputs">
+            <input type="tel" maxlength="1" id="po1" oninput="pOtpMove(this,'po2')">
+            <input type="tel" maxlength="1" id="po2" oninput="pOtpMove(this,'po3')">
+            <input type="tel" maxlength="1" id="po3" oninput="pOtpMove(this,'po4')">
+            <input type="tel" maxlength="1" id="po4" oninput="pOtpMove(this,'po5')">
+            <input type="tel" maxlength="1" id="po5" oninput="pOtpMove(this,'po6')">
+            <input type="tel" maxlength="1" id="po6" oninput="pOtpMove(this,null)">
+        </div>
+        <div class="p-error" id="pOtpError"></div>
+        <div class="p-resend">OTP nahi aaya? <span onclick="pResendOtp()">Dobara bhejo</span></div>
+        <button class="p-btn" onclick="pVerifyOtp()">Verify Karein ✓</button>
+        <div class="p-back" onclick="pGoBack()">← Wapas jaayein</div>
+    </div>
+
+    <!-- STEP 4: ID Choose -->
+    <div class="popup-step" id="ps4">
+        <div class="p-dots">
+            <div class="p-dot"></div><div class="p-dot"></div>
+            <div class="p-dot"></div><div class="p-dot active"></div>
+        </div>
+        <h2>Apni ID Chunein</h2>
+        <p class="popup-sub">Ek unique ID banao jo aapki pehchaan ho</p>
+        <div class="p-field">
+            <label>Apni ID likhein (min 4 characters)</label>
+            <div class="p-id-row">
+                <input type="text" id="pChooseId" placeholder="jaise: ramesh_kisan" oninput="pResetIdCheck()">
+                <button class="p-id-check-btn" onclick="pCheckId()">Check</button>
+            </div>
+        </div>
+        <div class="p-error" id="pIdError"></div>
+        <div class="p-success-msg" id="pIdSuccess"></div>
+        <button class="p-btn" id="pSaveIdBtn" onclick="pSaveId()" disabled>ID Save Karein →</button>
+    </div>
+
+    <!-- STEP 5: Success -->
+    <div class="popup-step" id="ps5">
+        <div class="p-success-box">
+            <i class="ti ti-circle-check"></i>
+            <h2 id="pSuccessTitle">Login Safal!</h2>
+            <p class="popup-sub" id="pSuccessSub">KisanSmart mein swagat hai!</p>
+            <div class="p-success-id">
+                <i class="ti ti-id-badge"></i> ID: <span id="pFinalId"></span>
+            </div>
+            <button class="p-btn" style="margin-top:20px" onclick="closePopup()">
+                Site Dekhein →
+            </button>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════
+     NAVBAR
+═══════════════════════════════════ -->
 <nav>
-    <h2>🌾 SmartAgro</h2>
-    <div>
+    <div class="nav-logo">
+        <div class="nav-logo-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2C10 2 5 5.5 5 10.5C5 13.5 7.2 16 10 16C12.8 16 15 13.5 15 10.5C15 5.5 10 2Z" fill="white" fill-opacity="0.9"/>
+                <circle cx="10" cy="11" r="2.5" fill="#1d9e75"/>
+            </svg>
+        </div>
+        <span class="nav-brand">Smart<span class="brand-green"> Kisan</span></span>
+    </div>
+
+    <div class="nav-links">
         <a href="/">Home</a>
-        <a href="/dashboard">Dashboard</a>
         <a href="/disease">Disease</a>
         <a href="/weather">Weather</a>
     </div>
-</nav>
 
-<section class="hero">
-    <h1>Smart Agriculture System</h1>
-    <p>AI-based farming solutions for better yield</p>
-    <a href="/dashboard" class="btn">Get Started</a>
-</section>
+    <div class="nav-actions">
+        {% if logged_in %}
+        <div class="nav-user">
 
-<section class="features">
-    <div class="card">🌱 Crop Monitoring</div>
-    <div class="card">💧 Smart Irrigation</div>
-    <div class="card">📊 Yield Prediction</div>
-</section>
-<h1>📊 Dashboard</h1>
+   <a href="/farmer-profile" class="nav-user-id">
+    <i class="ti ti-user"></i> PROFILE
+</a>
 
-<div class="grid">
-    <div class="box">Crop: {{ data.crop }}</div>
-    <div class="box">Status: {{ data.status }}</div>
-    <div class="box">Moisture: {{ data.moisture }}</div>
-    <div class="box">Temperature: {{ data.temperature }}</div>
+    <a href="/logout" class="nav-logout">Logout</a>
 </div>
+        {% else %}
+        <a href="#" class="btn-green-nav" onclick="document.getElementById('authPopup').classList.remove('hidden');return false;">Login / Register</a>
+        {% endif %}
+    </div>
+
+    <button class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/">Home</a>
+        <a href="/disease">Disease</a>
+        <a href="/weather">Weather</a>
+        <div class="nav-actions-mobile">
+            {% if logged_in %}
+            <a href="/farmer-profile" class="nav-user-id">
+                <i class="ti ti-user"></i>
+                    {{ session.get('user_id', '') }}
+            </a>
+            <a href="/logout" class="nav-logout">Logout</a>
+            {% else %}
+            <a href="#" class="btn-outline-nav" onclick="document.getElementById('authPopup').classList.remove('hidden');return false;">Login</a>
+            <a href="#" class="btn-green-nav" onclick="document.getElementById('authPopup').classList.remove('hidden');return false;">Register</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+<section class="hero" id="hero-section">
+    <div class="hero-badge">
+        <i class="ti ti-leaf"></i> Smart Agriculture Platform
+    </div>
+    <h1>Kheti ko banao <span class="hero-green">smart aur aasaan</span></h1>
+    <p>AI se fasal ki bimari pakdo, mausam dekhkar planning karo, aur vyapariyon se seedha judo — sab kuch ek jagah.</p>
+    <div class="hero-btns">
+       <a href="#" class="btn btn-main" onclick="handleRoleClick(event,'kisan')">
+            <i class="ti ti-plant-2"></i> Kisan ke roop mein shuru karein
+        </a>
+        <a href="#" class="btn btn-secondary-hero" onclick="handleRoleClick(event,'vyapari')">
+            <i class="ti ti-store"></i> Vyapari ke roop mein
+        </a>
+    </div>
+    <div class="hero-stats">
+        <div class="h-stat"><div class="h-stat-val">12,000+</div><div class="h-stat-lbl">Kisan registered</div></div>
+        <div class="h-stat-div"></div>
+        <div class="h-stat"><div class="h-stat-val">95%</div><div class="h-stat-lbl">Bimari detection accuracy</div></div>
+        <div class="h-stat-div"></div>
+        <div class="h-stat"><div class="h-stat-val">500+</div><div class="h-stat-lbl">Vyapari network</div></div>
+        <div class="h-stat-div"></div>
+        <div class="h-stat"><div class="h-stat-val">18</div><div class="h-stat-lbl">States mein active</div></div>
+    </div>
+</section>
+
+<section class="role-section">
+    <div class="section-label">Portal select karein</div>
+    <div class="section-title">Aap kaun hain?</div>
+    <div class="section-sub">Apne role ke hisab se portal mein jaayein</div>
+    <div class="role-grid">
+        <div class="role-card featured">
+            <span class="featured-badge">Most popular</span>
+            <div class="role-icon green"><i class="ti ti-plant-2"></i></div>
+            <div class="role-name">Kisan</div>
+            <div class="role-desc">Apni fasal ki dekhbhal karo — bimari pakdo, mausam janoo, aur mitti ke hisab se ugao.</div>
+            <ul class="role-features">
+                <li><i class="ti ti-virus-search"></i> AI se bimari detection</li>
+                <li><i class="ti ti-cloud-rain"></i> 3 mahine ka mausam forecast</li>
+                <li><i class="ti ti-layers"></i> Mitti gunvatta analysis</li>
+                <li><i class="ti ti-pill"></i> Davaiya order karo</li>
+            </ul>
+         <a href="#" class="role-btn role-btn-green" onclick="handleRoleClick(event,'kisan')"><i class="ti ti-arrow-right"></i> Kisan portal</a>
+        </div>
+        <div class="role-card">
+            <div class="role-icon amber"><i class="ti ti-store"></i></div>
+            <div class="role-name">Vyapari</div>
+            <div class="role-desc">Fasal ke bhav daalo, fertilizer aur davaiya becho — kisan seedha aapse khareedenge.</div>
+            <ul class="role-features">
+                <li><i class="ti ti-chart-line"></i> Live fasal bhav update</li>
+                <li><i class="ti ti-package"></i> Fertilizer &amp; davaiya shop</li>
+                <li><i class="ti ti-receipt"></i> Order management</li>
+                <li><i class="ti ti-users"></i> Kisan se direct connect</li>
+            </ul>
+            <a href="#" class="role-btn role-btn-outline" onclick="handleRoleClick(event,'vyapari')">Vyapari portal</a>
+        </div>
+    </div>
+</section>
+<section class="features">
+    <div class="section-label">Community</div>
+    <div class="section-title">Kisan bhai kya keh rahe hain</div>
+    <div class="section-sub">Unke anubhav, unki zubani</div>
+
+ <!-- Reviews Grid -->
+ {% if reviews %}
+<div class="review-grid">
+    {% for review in reviews %}
+    <div class="feat-card" style="flex-direction:row;gap:16px;align-items:flex-start;padding:20px">
+       {% if review.photo %}
+<img src="{{ review.photo }}" style="width:120px;height:120px;border-radius:10px;object-fit:cover;flex-shrink:0;border:2px solid #1d9e75">
+{% else %}
+<div style="width:120px;height:120px;border-radius:10px;background:#1d9e75;display:flex;align-items:center;justify-content:center;font-size:60px;font-weight:700;color:white;flex-shrink:0">
+    {{ review.name[0]|upper }}
+</div>
+{% endif %}
+        <div style="flex:1;min-width:0">
+            <div class="feat-title" style="font-size:15px;margin-bottom:3px">{{ review.name }}</div>
+            <div style="font-size:11px;color:#888;margin-bottom:8px">{{ review.role|capitalize }} · 🌾 {{ review.fasal }}</div>
+            <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:8px">"{{ review.experience }}"</div>
+            <div style="font-size:12px;color:#1d9e75;font-weight:600">
+                {{ '⭐' * review.stars }}&nbsp;
+                <span style="color:#aaa;font-weight:400">{{ review.date }}</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+    <div style="text-align:center;padding:40px;color:#888">
+        <i class="ti ti-message-circle" style="font-size:40px;display:block;margin-bottom:12px"></i>
+        Abhi koi review nahi hai! 🌱
+    </div>
+{% endif %}
+
+
+    <div style="text-align:center;margin-top:28px">
+        <button class="btn-green-nav" style="padding:10px 24px;font-size:14px;cursor:pointer;border:none"
+            onclick="openReviewForm()">
+            <i class="ti ti-pencil"></i> Apna anubhav share karein
+        </button>
+    </div>
+
+</section>
+
+<!-- ═══════════════════════════════════
+     REVIEW SUBMIT POPUP
+═══════════════════════════════════ -->
+<div class="popup-overlay hidden" id="reviewPopup">
+<div class="popup-card">
+    <div class="popup-logo">
+        <div class="popup-logo-icon"><i class="ti ti-pencil"></i></div>
+        <div class="popup-logo-text">Apna <span>Anubhav</span></div>
+    </div>
+
+    <div id="reviewFormDiv">
+        <div class="p-error" id="reviewError"></div>
+
+        <!-- Star Rating -->
+        <div class="p-field">
+            <label>Rating *</label>
+            <div style="display:flex;gap:8px;font-size:28px;cursor:pointer" id="starRow">
+                <span onclick="setStar(1)" id="s1">☆</span>
+                <span onclick="setStar(2)" id="s2">☆</span>
+                <span onclick="setStar(3)" id="s3">☆</span>
+                <span onclick="setStar(4)" id="s4">☆</span>
+                <span onclick="setStar(5)" id="s5">☆</span>
+            </div>
+        </div>
+
+        <!-- Fasal -->
+        <div class="p-field">
+            <label>Fasal ka naam</label>
+            <input type="text" id="reviewFasal" placeholder="jaise: Gehu, Chawal, Soybean">
+        </div>
+
+        <!-- Experience -->
+        <div class="p-field">
+            <label>Aapka anubhav *</label>
+            <textarea id="reviewText" placeholder="Apna experience likhein..." rows="4"
+                style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:9px;font-size:14px;font-family:'Segoe UI',sans-serif;resize:vertical;outline:none;color:#111"></textarea>
+        </div>
+
+        <!-- Photo -->
+        <div class="p-field">
+            <label>Apni photo (optional)</label>
+            <input type="file" id="reviewPhoto" accept="image/*"
+                style="width:100%;padding:8px;border:1px solid #ddd;border-radius:9px;font-size:13px">
+            <div id="photoPreview" style="margin-top:8px;display:none">
+                <img id="previewImg" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #1d9e75">
+            </div>
+        </div>
+
+        <button class="p-btn" onclick="submitReview()">Review Submit Karein →</button>
+        <div class="p-back" onclick="closeReviewPopup()">← Wapas jaayein</div>
+    </div>
+
+    <!-- Success -->
+    <div id="reviewSuccess" style="display:none;text-align:center;padding:20px 0">
+        <i class="ti ti-circle-check" style="font-size:52px;color:#1d9e75;display:block;margin-bottom:14px"></i>
+        <h2>Review Submit Ho Gaya!</h2>
+        <p class="popup-sub">Admin approve karne ke baad homepage pe dikhega.</p>
+        <button class="p-btn" style="margin-top:16px" onclick="closeReviewPopup()">Theek Hai</button>
+    </div>
+</div>
+</div>
+<section class="how-section">
+    <div class="section-label">Kaise kaam karta hai</div>
+    <div class="section-title">Sirf 4 steps mein shuru karo</div>
+    <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-title">Register karo</div><div class="step-desc">Kisan ya vyapari — apna role chunke account banao, bilkul free</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-title">Apni fasal daalo</div><div class="step-desc">Kaunsi fasal ugaa rahe ho, kahan, aur kitni zameen — bas itna batao</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-title">Photo scan karo</div><div class="step-desc">Plant ki photo khicho, AI turant bimari aur ilaaj batayega</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-title">Order &amp; plan karo</div><div class="step-desc">Davaiya order karo, mausam dekho, aur fasal ka plan banao</div></div>
+    </div>
+</section>
+
+<section class="dashboard-section">
+    <h1><i class="ti ti-layout-dashboard"></i> Dashboard</h1>
+    <div class="grid">
+        <div class="box"><div class="box-label">Crop</div><div class="box-val">{{ data.crop }}</div></div>
+        <div class="box"><div class="box-label">Status</div><div class="box-val">{{ data.status }}</div></div>
+        <div class="box"><div class="box-label">Moisture</div><div class="box-val">{{ data.moisture }}</div></div>
+        <div class="box"><div class="box-label">Temperature</div><div class="box-val">{{ data.temperature }}</div></div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="cta-box">
+        <div class="cta-title">Aaj hi shuru karo — bilkul free</div>
+        <div class="cta-sub">12,000 se zyada kisan pehle se use kar rahe hain. Aap kab join kar rahe hain?</div>
+        <div class="cta-btns">
+            <a href="#" class="cta-btn-main" onclick="document.getElementById('authPopup').classList.remove('hidden');return false;">Abhi register karein</a>
+            <a href="#features" class="cta-btn-out">Aur jaankari</a>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-logo">Kisan<span class="brand-green">Smart</span> &nbsp;·&nbsp; Smart Agriculture Platform</div>
+    <div class="footer-copy">© 2025 KisanSmart. Sab haq surakshit.</div>
+</footer>
+
+<script>
+// ── District Data ────────────────────────────────────────────
+const districtData = {
+    "Madhya Pradesh": ["Agar Malwa","Alirajpur","Anuppur","Ashoknagar","Balaghat","Barwani","Betul","Bhind","Bhopal","Burhanpur","Chhatarpur","Chhindwara","Damoh","Datia","Dewas","Dhar","Dindori","Guna","Gwalior","Harda","Hoshangabad","Indore","Jabalpur","Jhabua","Katni","Khandwa","Khargone","Mandla","Mandsaur","Morena","Narsinghpur","Neemuch","Niwari","Panna","Raisen","Rajgarh","Ratlam","Rewa","Sagar","Satna","Sehore","Seoni","Shahdol","Shajapur","Sheopur","Shivpuri","Sidhi","Singrauli","Tikamgarh","Ujjain","Umaria","Vidisha"],
+    "Uttar Pradesh": ["Agra","Aligarh","Allahabad","Ambedkar Nagar","Amethi","Amroha","Auraiya","Ayodhya","Azamgarh","Baghpat","Bahraich","Ballia","Balrampur","Banda","Barabanki","Bareilly","Basti","Bhadohi","Bijnor","Budaun","Bulandshahr","Chandauli","Chitrakoot","Deoria","Etah","Etawah","Farrukhabad","Fatehpur","Firozabad","Gautam Buddha Nagar","Ghaziabad","Ghazipur","Gonda","Gorakhpur","Hamirpur","Hapur","Hardoi","Hathras","Jalaun","Jaunpur","Jhansi","Kannauj","Kanpur Dehat","Kanpur Nagar","Kasganj","Kaushambi","Kushinagar","Lakhimpur Kheri","Lalitpur","Lucknow","Maharajganj","Mahoba","Mainpuri","Mathura","Mau","Meerut","Mirzapur","Moradabad","Muzaffarnagar","Pilibhit","Pratapgarh","Raebareli","Rampur","Saharanpur","Sambhal","Sant Kabir Nagar","Shahjahanpur","Shamli","Shrawasti","Siddharthnagar","Sitapur","Sonbhadra","Sultanpur","Unnao","Varanasi"],
+    "Rajasthan": ["Ajmer","Alwar","Banswara","Baran","Barmer","Bharatpur","Bhilwara","Bikaner","Bundi","Chittorgarh","Churu","Dausa","Dholpur","Dungarpur","Hanumangarh","Jaipur","Jaisalmer","Jalore","Jhalawar","Jhunjhunu","Jodhpur","Karauli","Kota","Nagaur","Pali","Pratapgarh","Rajsamand","Sawai Madhopur","Sikar","Sirohi","Sri Ganganagar","Tonk","Udaipur"],
+    "Maharashtra": ["Ahmednagar","Akola","Amravati","Aurangabad","Beed","Bhandara","Buldhana","Chandrapur","Dhule","Gadchiroli","Gondia","Hingoli","Jalgaon","Jalna","Kolhapur","Latur","Mumbai City","Mumbai Suburban","Nagpur","Nanded","Nandurbar","Nashik","Osmanabad","Palghar","Parbhani","Pune","Raigad","Ratnagiri","Sangli","Satara","Sindhudurg","Solapur","Thane","Wardha","Washim","Yavatmal"],
+    "Punjab": ["Amritsar","Barnala","Bathinda","Faridkot","Fatehgarh Sahib","Fazilka","Ferozepur","Gurdaspur","Hoshiarpur","Jalandhar","Kapurthala","Ludhiana","Mansa","Moga","Mohali","Muktsar","Nawanshahr","Pathankot","Patiala","Ropar","Sangrur","Tarn Taran"],
+    "Haryana": ["Ambala","Bhiwani","Charkhi Dadri","Faridabad","Fatehabad","Gurugram","Hisar","Jhajjar","Jind","Kaithal","Karnal","Kurukshetra","Mahendragarh","Nuh","Palwal","Panchkula","Panipat","Rewari","Rohtak","Sirsa","Sonipat","Yamunanagar"],
+    "Gujarat": ["Ahmedabad","Amreli","Anand","Aravalli","Banaskantha","Bharuch","Bhavnagar","Botad","Chhota Udaipur","Dahod","Dang","Devbhoomi Dwarka","Gandhinagar","Gir Somnath","Jamnagar","Junagadh","Kheda","Kutch","Mahisagar","Mehsana","Morbi","Narmada","Navsari","Panchmahal","Patan","Porbandar","Rajkot","Sabarkantha","Surat","Surendranagar","Tapi","Vadodara","Valsad"],
+    "Bihar": ["Araria","Arwal","Aurangabad","Banka","Begusarai","Bhagalpur","Bhojpur","Buxar","Darbhanga","East Champaran","Gaya","Gopalganj","Jamui","Jehanabad","Kaimur","Katihar","Khagaria","Kishanganj","Lakhisarai","Madhepura","Madhubani","Munger","Muzaffarpur","Nalanda","Nawada","Patna","Purnia","Rohtas","Saharsa","Samastipur","Saran","Sheikhpura","Sheohar","Sitamarhi","Siwan","Supaul","Vaishali","West Champaran"],
+    "Chhattisgarh": ["Balod","Baloda Bazar","Balrampur","Bastar","Bemetara","Bijapur","Bilaspur","Dantewada","Dhamtari","Durg","Gariaband","Janjgir-Champa","Jashpur","Kabirdham","Kanker","Kondagaon","Korba","Koriya","Mahasamund","Mungeli","Narayanpur","Raigarh","Raipur","Rajnandgaon","Sukma","Surajpur","Surguja"],
+    "Delhi": ["Central Delhi","East Delhi","New Delhi","North Delhi","North East Delhi","North West Delhi","Shahdara","South Delhi","South East Delhi","South West Delhi","West Delhi"],
+    "Other": ["Other"]
+};
+
+let pRole = null, pMode = 'login', pIdOk = false, session_role = null;
+
+// ── Role Access ───────────────────────────────────────────────
+const IS_LOGGED_IN = {{ 'true' if logged_in else 'false' }};
+const USER_ROLE = "{{ session.get('role', '') }}";
+
+function handleRoleClick(e, role) {
+    e.preventDefault();
+    if (IS_LOGGED_IN) {
+        window.location.href = role === 'kisan' ? '/farmer' : '/trader';
+    } else {
+        pSelectRole(role);
+        pShowStep('ps2'); // ← ps1 se ps2 kiya
+        document.getElementById('authPopup').classList.remove('hidden');
+    }
+}
+
+// ── Auth Popup ────────────────────────────────────────────────
+function pSelectRole(r) {
+    pRole = r;
+    session_role = r;
+    document.querySelectorAll('.p-role-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pr-' + r).classList.add('active');
+    document.getElementById('pNextBtn').disabled = false;
+}
+
+function pGoStep2() { pShowStep('ps2'); }
+
+function pShowStep(id) {
+    document.querySelectorAll('.popup-step').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function pSwitchTab(t) {
+    pMode = t;
+    document.getElementById('ptab-login').classList.toggle('active', t === 'login');
+    document.getElementById('ptab-register').classList.toggle('active', t === 'register');
+    document.getElementById('pLoginForm').style.display    = t === 'login'    ? 'block' : 'none';
+    document.getElementById('pRegisterForm').style.display = t === 'register' ? 'block' : 'none';
+}
+
+function pLoadDistricts() {
+    const state = document.getElementById('pState').value;
+    const distSel = document.getElementById('pDistrict');
+    distSel.innerHTML = '<option value="">-- District Chunein --</option>';
+    distSel.disabled = true;
+    if (state && districtData[state]) {
+        districtData[state].forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d; opt.textContent = d;
+            distSel.appendChild(opt);
+        });
+        distSel.disabled = false;
+    }
+}
+
+function pShowErr(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; }
+function pHideErr(id) { document.getElementById(id).style.display = 'none'; }
+function pShowOk(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; }
+function pHideOk(id) { document.getElementById(id).style.display = 'none'; }
+
+async function pSendOtp(mode) {
+    pMode = mode;
+    const mobile = mode === 'login'
+        ? document.getElementById('pLoginMobile').value
+        : document.getElementById('pRegMobile').value;
+    if (mobile.length !== 10 || isNaN(mobile)) {
+        pShowErr(mode === 'login' ? 'pLoginError' : 'pRegError', 'Sahi 10-digit mobile number dalein');
+        return;
+    }
+    if (mode === 'register') {
+        const fname  = document.getElementById('pFname').value.trim();
+        const lname  = document.getElementById('pLname').value.trim();
+        const state  = document.getElementById('pState').value;
+        const dist   = document.getElementById('pDistrict').value;
+        const gender = document.getElementById('pGender').value;
+        if (!fname || !lname || !state || !dist || !gender) {
+            pShowErr('pRegError', 'Saari starred (*) fields bharein'); return;
+        }
+    }
+    try {
+        const res  = await fetch('/send-otp', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mobile, role: pRole })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('pDevOtp').textContent  = data.dev_otp;
+            document.getElementById('pOtpSub').textContent  = mobile + ' par OTP bheja gaya';
+            ['po1','po2','po3','po4','po5','po6'].forEach(id => document.getElementById(id).value = '');
+            pHideErr('pOtpError');
+            pShowStep('ps3');
+            document.getElementById('po1').focus();
+        } else {
+            pShowErr(mode === 'login' ? 'pLoginError' : 'pRegError', data.message);
+        }
+    } catch(e) { pShowErr(mode === 'login' ? 'pLoginError' : 'pRegError', 'Server se connection nahi hua'); }
+}
+
+function pOtpMove(el, nextId) {
+    if (el.value.length === 1 && nextId) document.getElementById(nextId).focus();
+}
+
+async function pVerifyOtp() {
+    const entered = ['po1','po2','po3','po4','po5','po6']
+        .map(id => document.getElementById(id).value).join('');
+    if (entered.length !== 6) { pShowErr('pOtpError', '6-digit OTP pura bharein'); return; }
+    try {
+        const res  = await fetch('/verify-otp', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ otp: entered })
+        });
+        const data = await res.json();
+        if (data.success) {
+            pMode === 'register' ? await pRegisterUser() : await pLoginUser();
+        } else { pShowErr('pOtpError', data.message); }
+    } catch(e) { pShowErr('pOtpError', 'Server se connection nahi hua'); }
+}
+
+async function pRegisterUser() {
+    const body = {
+        first_name : document.getElementById('pFname').value.trim(),
+        last_name  : document.getElementById('pLname').value.trim(),
+        city       : document.getElementById('pDistrict').value,
+        village    : document.getElementById('pVillage').value.trim(),
+        state      : document.getElementById('pState').value,
+        gender     : document.getElementById('pGender').value,
+    };
+    const res  = await fetch('/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.success) { pShowStep('ps4'); }
+    else { pShowErr('pOtpError', data.message); }
+}
+
+async function pLoginUser() {
+    const res  = await fetch('/login-check', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+    });
+    const data = await res.json();
+    if (data.success) {
+        document.getElementById('pFinalId').textContent      = data.user_id;
+        document.getElementById('pSuccessTitle').textContent = 'Login Safal!';
+        document.getElementById('pSuccessSub').textContent   = 'KisanSmart mein swagat hai!';
+        pShowStep('ps5');
+    } else { pShowErr('pOtpError', data.message); }
+}
+
+function pResetIdCheck() {
+    pIdOk = false;
+    document.getElementById('pSaveIdBtn').disabled = true;
+    pHideErr('pIdError'); pHideOk('pIdSuccess');
+}
+
+async function pCheckId() {
+    const user_id = document.getElementById('pChooseId').value.trim();
+    if (!user_id || user_id.length < 4) { pShowErr('pIdError', 'ID kam se kam 4 characters ki honi chahiye'); return; }
+    try {
+        const res  = await fetch('/check-id', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id })
+        });
+        const data = await res.json();
+        if (data.success) {
+            pIdOk = true;
+            pHideErr('pIdError');
+            pShowOk('pIdSuccess', '✓ Yeh ID available hai!');
+            document.getElementById('pSaveIdBtn').disabled = false;
+        } else {
+            pIdOk = false;
+            pShowErr('pIdError', data.message);
+            pHideOk('pIdSuccess');
+            document.getElementById('pSaveIdBtn').disabled = true;
+        }
+    } catch(e) { pShowErr('pIdError', 'Server se connection nahi hua'); }
+}
+
+async function pSaveId() {
+    if (!pIdOk) return;
+    const user_id = document.getElementById('pChooseId').value.trim();
+    try {
+        const res  = await fetch('/save-id', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id })
+        });
+        const data = await res.json();
+        if (data.success) {
+            session_role = pRole;
+            document.getElementById('pFinalId').textContent      = data.user_id;
+            document.getElementById('pSuccessTitle').textContent = 'Registration Safal!';
+            document.getElementById('pSuccessSub').textContent   = 'Aapka account ban gaya!';
+            pShowStep('ps5');
+        } else { pShowErr('pIdError', data.message); }
+    } catch(e) { pShowErr('pIdError', 'Server se connection nahi hua'); }
+}
+
+async function pResendOtp() {
+    const mobile = pMode === 'login'
+        ? document.getElementById('pLoginMobile').value
+        : document.getElementById('pRegMobile').value;
+    const res  = await fetch('/send-otp', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile, role: pRole })
+    });
+    const data = await res.json();
+    if (data.success) { document.getElementById('pDevOtp').textContent = data.dev_otp; alert('OTP dobara bheja gaya!'); }
+}
+
+function pGoBack() { pShowStep('ps2'); }
+
+function closePopup() {
+    document.getElementById('authPopup').classList.add('hidden');
+    const role = session_role || USER_ROLE;
+    if (role === 'kisan') {
+        window.location.href = '/farmer';
+    } else if (role === 'vyapari') {
+        window.location.href = '/trader';
+    } else {
+        window.location.reload();
+    }
+}
+
+// ── Review Popup ──────────────────────────────────────────────
+let selectedStars = 0;
+let photoBase64   = '';
+
+function openReviewForm() {
+    {% if logged_in %}
+    document.getElementById('reviewPopup').classList.remove('hidden');
+    {% else %}
+    document.getElementById('authPopup').classList.remove('hidden');
+    {% endif %}
+}
+
+function closeReviewPopup() {
+    document.getElementById('reviewPopup').classList.add('hidden');
+    document.getElementById('reviewFormDiv').style.display = 'block';
+    document.getElementById('reviewSuccess').style.display = 'none';
+    selectedStars = 0;
+    setStar(0);
+}
+
+function setStar(n) {
+    selectedStars = n;
+    for (let i = 1; i <= 5; i++) {
+        document.getElementById('s' + i).textContent = i <= n ? '⭐' : '☆';
+    }
+}
+
+document.getElementById('reviewPhoto').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        photoBase64 = e.target.result;
+        document.getElementById('previewImg').src = photoBase64;
+        document.getElementById('photoPreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+
+async function submitReview() {
+    const text  = document.getElementById('reviewText').value.trim();
+    const fasal = document.getElementById('reviewFasal').value.trim();
+    if (!selectedStars) { pShowErr('reviewError', 'Rating zaroor chunein'); return; }
+    if (!text)          { pShowErr('reviewError', 'Anubhav likhna zaroori hai'); return; }
+    try {
+        const res  = await fetch('/submit-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stars: selectedStars, fasal, experience: text, photo: photoBase64 })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('reviewFormDiv').style.display = 'none';
+            document.getElementById('reviewSuccess').style.display = 'block';
+        } else { pShowErr('reviewError', data.message); }
+    } catch(e) { pShowErr('reviewError', 'Server se connection nahi hua'); }
+}
+
+// ── Hero BG Slideshow ─────────────────────────────────────────
+const bgImages = ["/static/images/bg1.png","/static/images/bg2.png","/static/images/bg3.png","/static/images/bg4.png","/static/images/bg5.png"];
+let currentBg = 0;
+const heroSection = document.getElementById('hero-section');
+const bg1 = document.createElement('div');
+const bg2 = document.createElement('div');
+[bg1, bg2].forEach(b => {
+    b.style.cssText = 'position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity 1.5s ease-in-out;z-index:-2;filter:brightness(0.6) blur(2px);';
+    heroSection.appendChild(b);
+});
+let active = bg1, inactive = bg2;
+active.style.backgroundImage = `url('${bgImages[0]}')`;
+active.style.opacity = '1';
+inactive.style.opacity = '0';
+setInterval(() => {
+    currentBg = (currentBg + 1) % bgImages.length;
+    inactive.style.backgroundImage = `url('${bgImages[currentBg]}')`;
+    inactive.style.opacity = '1';
+    active.style.opacity = '0';
+    [active, inactive] = [inactive, active];
+}, 4000);
+
+// ── Hamburger ─────────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const nav = hamburger.closest('nav');
+hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    nav.classList.toggle('open');
+});
+</script>
+
 </body>
 </html>

@@ -1,3 +1,5 @@
+
+
 import tensorflow as tf
 import numpy as np
 from PIL import Image
@@ -56,3 +58,9 @@ async def predict_disease(file):
         "solution": solutions.get(disease, "Consult expert"),
         "precaution": precautions.get(disease, "General care")
     }
+
+
+def predict_disease_sync(contents: bytes) -> dict:
+    """Flask ke liye — sync version"""
+    import asyncio
+    return asyncio.run(predict_disease_from_bytes(contents))

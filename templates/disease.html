@@ -1,22 +1,425 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-    <title>Disease Detection</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bimari Detection – KisanSmart</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f4f7f0; color: #1a2e0a; }
+
+        /* ── Navbar ── */
+        .ks-nav { background: #173404; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+        .ks-nav-logo { font-size: 17px; font-weight: 600; color: #c0dd97; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .ks-nav-links { display: flex; gap: 4px; }
+        .ks-nav-links a { font-size: 13px; color: #97c459; padding: 6px 14px; border-radius: 20px; text-decoration: none; transition: background 0.15s; }
+        .ks-nav-links a:hover, .ks-nav-links a.active { background: #27500a; color: #c0dd97; }
+
+        /* ── Hero ── */
+        .ks-hero { background: #27500a; padding: 1.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .ks-hero h1 { font-size: 22px; font-weight: 600; color: #c0dd97; margin-bottom: 5px; }
+        .ks-hero p { font-size: 13px; color: #97c459; }
+        .ks-hero-badge { display: inline-flex; align-items: center; gap: 7px; background: #173404; color: #c0dd97; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 24px; white-space: nowrap; flex-shrink: 0; }
+        .pulse { width: 7px; height: 7px; border-radius: 50%; background: #97c459; animation: pulse 1.5s infinite; display: inline-block; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+        /* ── Layout ── */
+        .ks-main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+        .ks-two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+        .ks-three { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.25rem; }
+
+        /* ── Cards ── */
+        .ks-card { background: #fff; border: 1px solid #d4e8c0; border-radius: 14px; padding: 1.2rem 1.4rem; }
+        .ks-card-title { font-size: 14px; font-weight: 600; color: #173404; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .ks-section-label { font-size: 11px; font-weight: 600; color: #7a9a62; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+
+        /* ── Kisan Info Strip ── */
+        .kisan-strip { background: #fff; border: 1px solid #d4e8c0; border-radius: 14px; padding: 0.9rem 1.4rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 1rem; }
+        .kisan-left { display: flex; align-items: center; gap: 12px; }
+        .kisan-avatar { width: 44px; height: 44px; border-radius: 50%; background: #eaf3de; border: 2px solid #97c459; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .kisan-name { font-size: 15px; font-weight: 600; color: #173404; margin-bottom: 3px; }
+        .kisan-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+        .kisan-meta span { font-size: 12px; color: #5a7a42; }
+        .kisan-fasalein { display: flex; gap: 6px; flex-wrap: wrap; }
+        .fasal-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 10px; background: #eaf3de; color: #27500a; }
+        .fasal-pill.alert { background: #fee2e2; color: #991b1b; }
+        .fasal-pill.warn  { background: #fef3c7; color: #92400e; }
+
+        /* ── Upload Zone ── */
+        .upload-zone { border: 2px dashed #639922; border-radius: 12px; background: #eaf3de; padding: 1.75rem 1rem; text-align: center; cursor: pointer; transition: background 0.2s, border-color 0.2s; margin-bottom: 14px; }
+        .upload-zone:hover { background: #c0dd97; border-color: #3b6d11; }
+        .upload-zone-icon { font-size: 40px; display: block; margin-bottom: 10px; }
+        .upload-zone-title { font-size: 15px; font-weight: 600; color: #27500a; margin-bottom: 4px; }
+        .upload-zone-sub { font-size: 12px; color: #5a7a42; margin-bottom: 14px; }
+        #file-input { display: none; }
+        .upload-preview { max-width: 100%; max-height: 200px; border-radius: 10px; margin-top: 10px; display: none; }
+
+        /* ── Crop Selector ── */
+        .crop-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+        .crop-pill-btn { border: 1px solid #d4e8c0; border-radius: 20px; background: #fff; font-size: 12px; color: #5a7a42; padding: 5px 13px; cursor: pointer; transition: all 0.15s; }
+        .crop-pill-btn:hover, .crop-pill-btn.active { background: #eaf3de; color: #27500a; border-color: #639922; font-weight: 600; }
+
+        /* ── Submit Btn ── */
+        .ks-btn-primary { display: inline-flex; align-items: center; gap: 7px; background: #27500a; color: #c0dd97; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; padding: 11px 24px; cursor: pointer; width: 100%; justify-content: center; transition: background 0.15s; }
+        .ks-btn-primary:hover { background: #3b6d11; }
+
+        /* ── Steps ── */
+        .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 1rem; }
+        .step { background: #fff; border: 1px solid #d4e8c0; border-radius: 12px; padding: 0.85rem 1rem; display: flex; gap: 10px; }
+        .step-num { width: 26px; height: 26px; border-radius: 50%; background: #eaf3de; color: #27500a; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .step-title { font-size: 12px; font-weight: 600; color: #173404; margin-bottom: 2px; }
+        .step-desc { font-size: 11px; color: #7a9a62; line-height: 1.4; }
+
+        /* ── Result Block ── */
+        .result-header { border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; }
+        .result-header.healthy { background: #eaf3de; border: 1px solid #97c459; }
+        .result-header.sick    { background: #fee2e2; border: 1px solid #fca5a5; }
+        .result-header.medium  { background: #fef3c7; border: 1px solid #fcd34d; }
+        .result-disease { font-size: 18px; font-weight: 700; margin-bottom: 3px; }
+        .result-header.healthy .result-disease { color: #14532d; }
+        .result-header.sick    .result-disease { color: #7f1d1d; }
+        .result-header.medium  .result-disease { color: #78350f; }
+        .result-conf { font-size: 12px; }
+        .result-header.healthy .result-conf { color: #166534; }
+        .result-header.sick    .result-conf { color: #991b1b; }
+        .result-header.medium  .result-conf { color: #92400e; }
+        .result-icon { font-size: 28px; flex-shrink: 0; }
+
+        .metrics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 12px; }
+        .metric-box { background: #f4f7f0; border-radius: 10px; padding: 0.75rem 0.9rem; }
+        .metric-label { font-size: 11px; color: #7a9a62; margin-bottom: 3px; }
+        .metric-val { font-size: 16px; font-weight: 700; color: #173404; }
+        .metric-val.danger { color: #991b1b; }
+        .metric-val.warn   { color: #92400e; }
+        .metric-val.ok     { color: #166534; }
+
+        .severity-bar { margin-bottom: 10px; }
+        .sev-label { display: flex; justify-content: space-between; font-size: 12px; color: #5a7a42; margin-bottom: 4px; }
+        .sev-track { height: 7px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+        .sev-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+        .sev-red    { background: #ef4444; }
+        .sev-amber  { background: #f59e0b; }
+        .sev-green  { background: #639922; }
+
+        .treat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .treat-card { background: #fff; border: 1px solid #d4e8c0; border-radius: 12px; padding: 0.85rem 1rem; }
+        .treat-icon-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .treat-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+        .ic-coral  { background: #fff0ec; }
+        .ic-green  { background: #eaf3de; }
+        .ic-red    { background: #fee2e2; }
+        .ic-teal   { background: #d1fae5; }
+        .treat-title { font-size: 12px; font-weight: 600; color: #173404; }
+        .treat-body  { font-size: 12px; color: #5a7a42; line-height: 1.5; }
+
+        .uploaded-img-box { text-align: center; margin-bottom: 12px; }
+        .uploaded-img-box img { max-width: 100%; max-height: 180px; border-radius: 10px; border: 2px solid #d4e8c0; }
+
+        /* ── History Cards ── */
+        .history-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+        .hist-card { background: #fff; border: 1px solid #d4e8c0; border-radius: 12px; padding: 0.85rem 1rem; }
+        .hist-thumb { width: 100%; height: 60px; border-radius: 8px; background: #f4f7f0; display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 8px; overflow: hidden; }
+        .hist-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        .hist-name { font-size: 12px; font-weight: 600; color: #173404; margin-bottom: 2px; }
+        .hist-date { font-size: 11px; color: #7a9a62; margin-bottom: 5px; }
+        .hist-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warn   { background: #fef3c7; color: #92400e; }
+        .badge-ok     { background: #eaf3de; color: #27500a; }
+
+        .tip-strip { background: #eaf3de; border-left: 3px solid #639922; border-radius: 0 10px 10px 0; padding: 0.75rem 1rem; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 1rem; }
+        .tip-strip p { font-size: 12px; color: #1a3a08; line-height: 1.6; }
+        .tip-strip p strong { font-weight: 600; }
+
+        @media (max-width: 700px) {
+            .ks-two, .ks-three, .steps, .treat-grid, .history-grid, .metrics-row { grid-template-columns: 1fr; }
+            .ks-hero { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
 </head>
 <body>
 
-<h1>🌱 Disease Detection</h1>
+<!-- Navbar -->
+<nav class="ks-nav">
+    <a href="/" class="ks-nav-logo">🌾 KisanSmart</a>
+    <div class="ks-nav-links">
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/disease" class="active">Bimari</a>
+        <a href="/weather">Mausam</a>
+        <a href="/farmer">Kisan</a>
+    </div>
+</nav>
 
-<form>
-    <input type="file" />
-    <br><br>
-    <button>Upload & Predict</button>
-</form>
+<!-- Hero -->
+<section class="ks-hero">
+    <div>
+        <h1>🔬 Fasal Bimari Detector</h1>
+        <p>Photo upload karo — AI 3 second mein bimari + ilaj batayega</p>
+    </div>
+    <div class="ks-hero-badge"><span class="pulse"></span> AI Model Active</div>
+</section>
 
-<p>Result: Healthy</p>
+<main class="ks-main">
 
-<a href="/">⬅ Back</a>
+    <!-- Kisan Info Strip -->
+    {% if kisan %}
+    <div class="kisan-strip">
+        <div class="kisan-left">
+            <div class="kisan-avatar">🧑‍🌾</div>
+            <div>
+                <div class="kisan-name">{{ kisan.naam }}</div>
+                <div class="kisan-meta">
+                    <span>📍 {{ kisan.location }}</span>
+                    <span>📐 {{ kisan.zameen_bigha }} Bigha</span>
+                    <span>🏡 {{ kisan.khet_count }} Khet</span>
+                </div>
+            </div>
+        </div>
+        <div class="kisan-fasalein">
+            {% for f in fasalein %}
+                <span class="fasal-pill {% if f.status == 'Alert' %}alert{% elif f.status == 'Sinchai Chahiye' %}warn{% endif %}">
+                    {{ f.fasal_naam }}
+                    {% if f.status == 'Alert' %} ⚠{% elif f.status == 'Sinchai Chahiye' %} 💧{% endif %}
+                </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Steps -->
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <div>
+                <div class="step-title">Photo lo</div>
+                <div class="step-desc">Bimaar patti ki seedhi photo khicho, tez roshni mein</div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <div>
+                <div class="step-title">Upload karo</div>
+                <div class="step-desc">JPG/PNG, max 10MB — neeche select karo</div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <div>
+                <div class="step-title">Result dekho</div>
+                <div class="step-desc">AI bimari + severity + ilaj sab batayega</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ks-two">
+        <!-- LEFT: Upload Form -->
+        <div>
+            <div class="ks-card">
+                <div class="ks-card-title">📷 Photo Upload Karo</div>
+
+                <form method="POST" enctype="multipart/form-data" action="/disease" id="upload-form">
+
+                    <!-- Upload Zone -->
+                    <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+                        <span class="upload-zone-icon">☁️</span>
+                        <div class="upload-zone-title">Fasal ki photo yahan drop karo</div>
+                        <div class="upload-zone-sub">ya click karke gallery se choose karo</div>
+                        <img id="preview-img" class="upload-preview" alt="Preview">
+                    </div>
+                    <input type="file" id="file-input" name="file" accept="image/*" required onchange="previewImage(this)">
+
+                    <!-- Fasal Select -->
+                    <div style="margin-bottom: 14px;">
+                        <div class="ks-section-label" style="margin-bottom:8px;">Fasal chunno</div>
+                        <div class="crop-pills" id="crop-pills">
+                            {% set fasalein_list = ["Gehu", "Dhan", "Makka", "Tomato", "Aalu", "Soyabean", "Kapas"] %}
+                            {% for f in fasalein_list %}
+                            <span class="crop-pill-btn {% if loop.first %}active{% endif %}"
+                                  onclick="selectFasal(this, '{{ f }}')">{{ f }}</span>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="fasal" id="fasal-input" value="Gehu">
+                    </div>
+
+                    <button type="submit" class="ks-btn-primary">🔬 Scan Karo & Result Dekho</button>
+                </form>
+            </div>
+
+            <!-- Tip -->
+            <div class="tip-strip" style="margin-top: 1rem;">
+                <span style="font-size:18px; flex-shrink:0;">💡</span>
+                <p><strong>Achhi photo kaise lo:</strong> Patti ko seedha pakdo, camera 15-20cm door rakho, tez dhoop mein photo lo. Ek patti ek frame mein.</p>
+            </div>
+        </div>
+
+        <!-- RIGHT: Result or Waiting -->
+        <div>
+            {% if result %}
+            <!-- ── Result Block ── -->
+            {% set is_healthy = result.disease == "Healthy" %}
+            {% set is_medium = result.severity == "Medium" %}
+
+            {% if is_healthy %}
+                {% set header_class = "healthy" %}
+                {% set icon = "✅" %}
+            {% elif is_medium %}
+                {% set header_class = "medium" %}
+                {% set icon = "⚠️" %}
+            {% else %}
+                {% set header_class = "sick" %}
+                {% set icon = "🚨" %}
+            {% endif %}
+
+            {% if uploaded_image %}
+            <div class="uploaded-img-box">
+                <img src="{{ uploaded_image }}" alt="Uploaded scan">
+            </div>
+            {% endif %}
+
+            <div class="result-header {{ header_class }}">
+                <span class="result-icon">{{ icon }}</span>
+                <div>
+                    <div class="result-disease">{{ result.disease }}</div>
+                    <div class="result-conf">
+                        AI Confidence: {{ result.confidence }}% &nbsp;·&nbsp;
+                        Fasal: {{ selected_fasal or "Gehu" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-row">
+                <div class="metric-box">
+                    <div class="metric-label">Bimari</div>
+                    <div class="metric-val {% if not is_healthy %}danger{% else %}ok{% endif %}">{{ result.disease }}</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">AI Sure Hai</div>
+                    <div class="metric-val {% if result.confidence > 85 %}ok{% else %}warn{% endif %}">{{ result.confidence }}%</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Fasal Bachne ka Chance</div>
+                    <div class="metric-val {% if result.bachne_ka_chance > 80 %}ok{% elif result.bachne_ka_chance > 60 %}warn{% else %}danger{% endif %}">
+                        {{ result.bachne_ka_chance }}%
+                    </div>
+                </div>
+            </div>
+
+            <div class="severity-bar">
+                <div class="sev-label">
+                    <span>Bimari ki Gambhirta</span>
+                    <span>{{ result.severity }} — {{ result.severity_pct }}%</span>
+                </div>
+                <div class="sev-track">
+                    <div class="sev-fill {% if result.severity == 'High' %}sev-red{% elif result.severity == 'Medium' %}sev-amber{% else %}sev-green{% endif %}"
+                         style="width: {{ result.severity_pct }}%"></div>
+                </div>
+            </div>
+
+            <div class="treat-grid">
+                <div class="treat-card">
+                    <div class="treat-icon-row">
+                        <div class="treat-icon ic-coral">💊</div>
+                        <span class="treat-title">Dawai / Spray</span>
+                    </div>
+                    <div class="treat-body">{{ result.solution }}</div>
+                </div>
+                <div class="treat-card">
+                    <div class="treat-icon-row">
+                        <div class="treat-icon ic-green">🛡️</div>
+                        <span class="treat-title">Savdhani</span>
+                    </div>
+                    <div class="treat-body">{{ result.precaution }}</div>
+                </div>
+                <div class="treat-card">
+                    <div class="treat-icon-row">
+                        <div class="treat-icon ic-red">🗑️</div>
+                        <span class="treat-title">Bimaar Patti Hatao</span>
+                    </div>
+                    <div class="treat-body">Bimaar pattiyan tor ke door jalao — unhe khet mein na chodo.</div>
+                </div>
+                <div class="treat-card">
+                    <div class="treat-icon-row">
+                        <div class="treat-icon ic-teal">📅</div>
+                        <span class="treat-title">Agli Check</span>
+                    </div>
+                    <div class="treat-body">7 din baad dobara scan karo. Sudhar na ho toh Krishi Kendra jao.</div>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Waiting State -->
+            <div class="ks-card" style="text-align:center; padding: 2.5rem 1.5rem;">
+                <div style="font-size: 52px; margin-bottom: 14px;">🌱</div>
+                <div style="font-size: 16px; font-weight: 600; color: #173404; margin-bottom: 8px;">Fasal ki photo upload karo</div>
+                <div style="font-size: 13px; color: #7a9a62; line-height: 1.6;">Baayi taraf photo select karo aur "Scan Karo" press karo.<br>AI 3 second mein result dikhayega.</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ── Scan History ── -->
+    <div class="ks-section-label">Pichle Scans</div>
+    <div class="history-grid">
+        {% if history %}
+            {% for scan in history %}
+            <div class="hist-card">
+                <div class="hist-thumb">
+                    {% if scan.image_path %}
+                        <img src="{{ scan.image_path }}" alt="{{ scan.disease }}">
+                    {% else %}
+                        🌾
+                    {% endif %}
+                </div>
+                <div class="hist-name">{{ scan.fasal }} — {{ scan.disease }}</div>
+                <div class="hist-date">{{ scan.scan_date.strftime('%d %b %Y, %I:%M %p') if scan.scan_date else 'N/A' }}</div>
+                <span class="hist-badge
+                    {% if scan.disease == 'Healthy' %}badge-ok
+                    {% elif scan.severity == 'High' %}badge-danger
+                    {% else %}badge-warn{% endif %}">
+                    {% if scan.disease == 'Healthy' %}Theek Hai
+                    {% elif scan.severity == 'High' %}Zyada Bimari
+                    {% else %}Thodi Bimari{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="ks-card" style="grid-column: 1/-1; text-align: center; padding: 1.5rem; color: #7a9a62;">
+                <span style="font-size: 28px; display: block; margin-bottom: 8px;">📷</span>
+                Abhi tak koi scan nahi hua. Pehli photo upload karo!
+            </div>
+        {% endif %}
+    </div>
+
+</main>
+
+<script>
+function previewImage(input) {
+    const img = document.getElementById('preview-img');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function selectFasal(el, naam) {
+    document.querySelectorAll('.crop-pill-btn').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('fasal-input').value = naam;
+}
+
+// Auto scroll to result if present
+{% if result %}
+window.addEventListener('load', () => {
+    document.querySelector('.result-header')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+{% endif %}
+</script>
 
 </body>
 </html>

@@ -1,20 +1,446 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-    <title>Farmer Section</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard – KisanSmart</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f4f7f0;
+            color: #1a2e0a;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .ks-nav {
+            background: #173404;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            min-height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .ks-nav-logo {
+            font-size: 17px; font-weight: 600; color: #c0dd97;
+            display: flex; align-items: center; gap: 8px; text-decoration: none;
+        }
+        .ks-nav-logo span { font-size: 20px; }
+        .ks-nav-links { display: flex; gap: 4px; }
+        .ks-nav-links a {
+            font-size: 13px; color: #97c459; padding: 6px 14px;
+            border-radius: 20px; text-decoration: none; transition: background 0.15s, color 0.15s;
+        }
+        .ks-nav-links a:hover, .ks-nav-links a.active { background: #27500a; color: #c0dd97; }
+
+        /* Hamburger */
+        .ks-hamburger {
+            display: none; flex-direction: column; justify-content: center;
+            gap: 5px; width: 36px; height: 36px; cursor: pointer;
+            background: none; border: none; padding: 4px; border-radius: 8px;
+        }
+        .ks-hamburger:hover { background: #27500a; }
+        .ks-hamburger span {
+            display: block; width: 100%; height: 2px; background: #c0dd97;
+            border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .ks-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .ks-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .ks-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .ks-mobile-menu {
+            display: none; flex-direction: column; width: 100%;
+            padding: 10px 0; border-top: 1px solid #27500a;
+        }
+        .ks-mobile-menu a {
+            font-size: 14px; color: #97c459; padding: 10px 14px;
+            border-radius: 8px; text-decoration: none; transition: background 0.15s;
+        }
+        .ks-mobile-menu a:hover, .ks-mobile-menu a.active { background: #27500a; color: #c0dd97; }
+        .ks-nav.open .ks-mobile-menu { display: flex; }
+
+        /* Hero */
+        .ks-hero {
+            background: #27500a; padding: 2rem 1.5rem 1.75rem;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .ks-hero-left h1 {
+            font-size: 24px; font-weight: 600; color: #c0dd97;
+            margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
+        }
+        .ks-hero-left h1 span { font-size: 26px; }
+
+        .ks-hero-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #173404; color: #c0dd97; font-size: 12px; font-weight: 600;
+            padding: 8px 16px; border-radius: 24px; white-space: nowrap; flex-shrink: 0;
+        }
+        .pulse { width: 7px; height: 7px; border-radius: 50%; background: #97c459; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+        .ks-main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+        .ks-profile {
+            background: #fff; border: 1px solid #d4e8c0; border-radius: 14px;
+            padding: 1.1rem 1.4rem; display: flex; align-items: center;
+            justify-content: space-between; gap: 16px; margin-bottom: 1rem;
+        }
+        .ks-profile-left { display: flex; align-items: center; gap: 14px; }
+        .ks-avatar {
+            width: 52px; height: 52px; border-radius: 50%; background: #eaf3de;
+            border: 2px solid #97c459; display: flex; align-items: center;
+            justify-content: center; font-size: 24px; flex-shrink: 0;
+        }
+        .ks-profile-name { font-size: 16px; font-weight: 600; color: #173404; margin-bottom: 4px; }
+        .ks-profile-meta { display: flex; flex-wrap: wrap; gap: 12px; }
+        .ks-profile-meta span { font-size: 12px; color: #5a7a42; display: flex; align-items: center; gap: 4px; }
+        .ks-status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #eaf3de; color: #27500a; font-size: 11px; font-weight: 600;
+            padding: 6px 14px; border-radius: 20px;
+        }
+
+        .ks-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1rem; }
+        .ks-stat { background: #fff; border: 1px solid #d4e8c0; border-radius: 12px; padding: 1rem 1.1rem; }
+        .ks-stat-label { font-size: 11px; color: #7a9a62; font-weight: 500; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .ks-stat-val { font-size: 22px; font-weight: 600; color: #173404; }
+        .ks-stat-val small { font-size: 13px; font-weight: 400; color: #5a7a42; }
+        .ks-stat-sub { font-size: 11px; color: #5a7a42; margin-top: 3px; }
+        .ks-stat-sub.warn { color: #c0392b; }
+
+        .ks-tip {
+            background: #eaf3de; border-left: 3px solid #639922; border-radius: 0 10px 10px 0;
+            padding: 0.8rem 1.1rem; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 1.25rem;
+        }
+        .ks-tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+        .ks-tip p { font-size: 13px; color: #1a3a08; line-height: 1.6; }
+        .ks-tip p strong { font-weight: 600; }
+
+        .ks-section-label { font-size: 11px; font-weight: 600; color: #7a9a62; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+
+        .ks-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+        .ks-card {
+            background: #fff; border: 1px solid #d4e8c0; border-radius: 14px;
+            padding: 1.1rem 1.2rem; text-decoration: none; color: inherit;
+            display: block; cursor: pointer; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+        }
+        .ks-card:hover { transform: translateY(-4px); border-color: #639922; box-shadow: 0 6px 20px rgba(63,109,17,0.10); }
+        .ks-card.ks-card-star { border: 2px solid #639922; }
+        .ks-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .ks-card-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .ks-badge { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 10px; }
+        .ks-badge-ai   { background: #ede9fe; color: #5b21b6; }
+        .ks-badge-live { background: #eaf3de; color: #27500a; }
+        .ks-badge-new  { background: #e0f2fe; color: #0369a1; }
+        .ks-badge-smart{ background: #e0f2fe; color: #0369a1; }
+        .ks-card-title { font-size: 14px; font-weight: 600; color: #173404; margin-bottom: 4px; }
+        .ks-card-desc  { font-size: 12px; color: #5a7a42; line-height: 1.55; }
+
+        .ic-coral  { background: #fff0ec; color: #c0392b; }
+        .ic-blue   { background: #e0f2fe; color: #0369a1; }
+        .ic-amber  { background: #fef3c7; color: #92400e; }
+        .ic-green  { background: #eaf3de; color: #27500a; }
+        .ic-teal   { background: #d1fae5; color: #065f46; }
+        .ic-purple { background: #ede9fe; color: #5b21b6; }
+        .ic-sky    { background: #e0f2fe; color: #0369a1; }
+
+        .ks-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+
+        .ks-weather { background: #173404; border-radius: 14px; padding: 1.2rem 1.4rem; }
+        .ks-weather-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+        .ks-weather-city { font-size: 12px; color: #97c459; margin-bottom: 4px; }
+        .ks-weather-temp { font-size: 36px; font-weight: 600; color: #c0dd97; line-height: 1; }
+        .ks-weather-desc { font-size: 12px; color: #97c459; margin-top: 4px; }
+        .ks-weather-icon { font-size: 46px; }
+        .ks-weather-details { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+        .ks-wdet { background: #27500a; border-radius: 8px; padding: 8px 10px; text-align: center; }
+        .ks-wdet-l { font-size: 10px; color: #97c459; margin-bottom: 3px; }
+        .ks-wdet-v { font-size: 14px; font-weight: 600; color: #c0dd97; }
+
+        .ks-mandi { background: #fff; border: 1px solid #d4e8c0; border-radius: 14px; padding: 1.1rem 1.25rem; }
+        .ks-mandi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .ks-mandi-title { font-size: 14px; font-weight: 600; color: #173404; }
+        .ks-mandi-date { font-size: 11px; color: #7a9a62; }
+        .ks-mandi-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #edf5e4; }
+        .ks-mandi-row:last-child { border-bottom: none; }
+        .ks-mandi-crop { font-size: 13px; color: #1a2e0a; display: flex; align-items: center; gap: 6px; }
+        .ks-mandi-crop em { font-size: 16px; font-style: normal; }
+        .ks-mandi-right { display: flex; align-items: center; gap: 8px; }
+        .ks-mandi-price { font-size: 13px; font-weight: 600; color: #27500a; }
+        .ks-trend { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 8px; }
+        .up   { background: #eaf3de; color: #27500a; }
+        .down { background: #fee2e2; color: #991b1b; }
+
+        .ks-act { background: #fff; border: 1px solid #d4e8c0; border-radius: 14px; padding: 1.1rem 1.25rem; }
+        .ks-act-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #edf5e4; }
+        .ks-act-item:last-child { border-bottom: none; }
+        .ks-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+        .d-red   { background: #e74c3c; }
+        .d-amber { background: #f39c12; }
+        .d-green { background: #639922; }
+        .ks-act-text { font-size: 13px; color: #1a2e0a; line-height: 1.5; }
+        .ks-act-time { font-size: 11px; color: #7a9a62; margin-top: 2px; }
+
+        .ks-action-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 2rem; margin-top: 0.25rem; }
+        .ks-btn-primary {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #27500a; color: #c0dd97; border: none; border-radius: 10px;
+            font-size: 13px; font-weight: 600; padding: 10px 20px; cursor: pointer; text-decoration: none; transition: background 0.15s;
+        }
+        .ks-btn-primary:hover { background: #3b6d11; }
+        .ks-btn-secondary {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #fff; border: 1px solid #97c459; border-radius: 10px; color: #27500a;
+            font-size: 13px; font-weight: 500; padding: 10px 20px; cursor: pointer; text-decoration: none; transition: background 0.15s;
+        }
+        .ks-btn-secondary:hover { background: #eaf3de; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .ks-hamburger { display: flex; }
+            .ks-nav-links { display: none; }
+            .ks-features { grid-template-columns: repeat(2,1fr); }
+            .ks-stats    { grid-template-columns: repeat(2,1fr); }
+            .ks-two-col  { grid-template-columns: 1fr; }
+            .ks-hero { flex-direction: column; align-items: flex-start; }
+            .ks-profile { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .ks-features { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
-<h1>👨‍🌾 Farmer Dashboard</h1>
+<!-- Navbar -->
+<nav class="ks-nav" id="ksNav">
+    <a href="/" class="ks-nav-logo"><span>🌾</span> KisanSmart</a>
 
-<div class="grid">
-    <div class="box">My Crops</div>
-    <div class="box">Soil Data</div>
-    <div class="box">Irrigation Status</div>
-</div>
+    <div class="ks-nav-links">
+        <a href="/">Home</a>
+        <a href="/disease">Bimari</a>
+        <a href="/weather">Mausam</a>
+        <a href="/farmer" class="active">Kisan</a>
+    </div>
 
-<a href="/">⬅ Back</a>
+    <div style="display:flex;align-items:center;gap:10px;">
+        <a href="/farmer-profile"
+           style="background:#639922;color:white;text-decoration:none;
+                  padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;">
+            👤 PROFILE
+        </a>
+
+        <a href="/logout" style="font-size:13px;color:#ffffff;cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid #ddd;text-decoration:none;">Logout</a>
+
+    </div>
+
+    <button class="ks-hamburger" id="ksHamburger">
+        <span></span><span></span><span></span>
+    </button>
+
+    <div class="ks-mobile-menu">
+        <a href="/">Home</a>
+        <a href="/disease">Bimari</a>
+        <a href="/weather">Mausam</a>
+        <a href="/farmer" class="active">Kisan</a>
+    </div>
+</nav>
+<!-- Hero -->
+<section class="ks-hero">
+    <div class="ks-hero-left">
+        <h1><span>🧑‍🌾</span> <b>Kisan Dashboard</b></h1>
+        <p>Apni fasal ki poori jankari, bimari alert, mandi bhav aur mausam — sab ek hi jagah.</p>
+    </div>
+    <div class="ks-hero-badge"><span class="pulse"></span> AI Active</div>
+</section>
+
+<!-- Main -->
+<main class="ks-main">
+
+    <div class="ks-profile">
+        <div class="ks-profile-left">
+            <div class="ks-avatar">🧑‍🌾</div>
+            <div>
+                <div class="ks-profile-name">{{ kisan.naam if kisan and kisan.naam else 'Kisan' }}</div>
+                <div class="ks-profile-meta">
+                   <span>📍 {{ kisan.state if kisan and kisan.state else 'Location add karein' }}</span>
+
+
+                    <span>📱 {{ kisan.phone if kisan and kisan.phone else '' }}</span>
+
+                </div>
+            </div>
+        </div>
+        <span class="ks-status-badge"><span class="pulse" style="background:#639922;"></span> Active Kisan</span>
+    </div>
+
+    <div class="ks-stats">
+        <div class="ks-stat">
+            <div class="ks-stat-label">Kul Zameen</div>
+            <div class="ks-stat-val">{{ kisan.zameen_bigha if kisan else 0 }} <small>Bigha</small></div>
+            <div class="ks-stat-sub">2 khet registered</div>
+        </div>
+        <div class="ks-stat">
+            <div class="ks-stat-label">Is Season</div>
+            <div class="ks-stat-val">3 <small>Fasal</small></div>
+            <div class="ks-stat-sub">Gehu, Soya, Makka</div>
+        </div>
+        <div class="ks-stat">
+            <div class="ks-stat-label">Bimari Scans</div>
+            <div class="ks-stat-val">12</div>
+            <div class="ks-stat-sub warn">⚠ 2 alert active</div>
+        </div>
+        <div class="ks-stat">
+            <div class="ks-stat-label">Paidawar Andaza</div>
+            <div class="ks-stat-val">68 <small>Quintal</small></div>
+            <div class="ks-stat-sub">↑ +12% pichhle saal se</div>
+        </div>
+    </div>
+
+    <div class="ks-tip">
+        <span class="ks-tip-icon">💡</span>
+        <p><strong>Aaj ki Salah:</strong> Agle 3 din mein barish ka andasha hai — sinchai rokke rakho aur khet mein paani jamne na do.</p>
+    </div>
+
+    <div class="ks-section-label">Main Suvidhaen</div>
+    <div class="ks-features">
+        <a href="/disease" class="ks-card ks-card-star">
+            <div class="ks-card-top"><div class="ks-card-icon ic-coral">🔬</div><span class="ks-badge ks-badge-ai">AI</span></div>
+            <div class="ks-card-title">Bimari Pehchano</div>
+            <div class="ks-card-desc">Photo upload karo — AI 3 second mein bimari + ilaj batayega</div>
+        </a>
+        <a href="/weather" class="ks-card">
+            <div class="ks-card-top"><div class="ks-card-icon ic-blue">🌦</div><span class="ks-badge ks-badge-live">Live</span></div>
+            <div class="ks-card-title">Mausam Jankari</div>
+            <div class="ks-card-desc">Barish, garmi, aandhi — sab alert pehle milega</div>
+        </a>
+        <div class="ks-card">
+            <div class="ks-card-top"><div class="ks-card-icon ic-amber">💰</div><span class="ks-badge ks-badge-live">Live</span></div>
+            <div class="ks-card-title">Mandi Bhav</div>
+            <div class="ks-card-desc">Gehu, Soya, Makka ke aaj ke live rates dekho</div>
+        </div>
+        <div class="ks-card">
+            <div class="ks-card-top"><div class="ks-card-icon ic-green">🌾</div><span class="ks-badge ks-badge-ai">AI</span></div>
+            <div class="ks-card-title">Fasal Salah</div>
+            <div class="ks-card-desc">Zameen aur mausam ke hisaab se best fasal</div>
+        </div>
+        <div class="ks-card">
+            <div class="ks-card-top"><div class="ks-card-icon ic-teal">💧</div><span class="ks-badge ks-badge-smart">Smart</span></div>
+            <div class="ks-card-title">Sinchai Schedule</div>
+            <div class="ks-card-desc">Kab aur kitna paani dena hai — smart reminder</div>
+        </div>
+        <div class="ks-card">
+            <div class="ks-card-top"><div class="ks-card-icon ic-purple">🧪</div><span class="ks-badge ks-badge-new">Report</span></div>
+            <div class="ks-card-title">Mitti ki Sehat</div>
+            <div class="ks-card-desc">pH, nitrogen, nutrients ki poori report</div>
+        </div>
+        <div class="ks-card">
+            <div class="ks-card-top"><div class="ks-card-icon ic-sky">📈</div><span class="ks-badge ks-badge-ai">AI</span></div>
+            <div class="ks-card-title">Paidawar Andaza</div>
+            <div class="ks-card-desc">Is baar kitni fasal hogi — AI prediction</div>
+        </div>
+        <div class="ks-card">
+            <div class="ks-card-top"><div class="ks-card-icon ic-green">📋</div><span class="ks-badge ks-badge-new">History</span></div>
+            <div class="ks-card-title">Fasal Report</div>
+            <div class="ks-card-desc">Poori season ki progress ek jagah dekho</div>
+        </div>
+    </div>
+
+    <div class="ks-two-col">
+        <div class="ks-weather">
+            <div class="ks-weather-top">
+                <div>
+                    <div class="ks-weather-city">📍 Indore, MP</div>
+                    <div class="ks-weather-temp">34°C</div>
+                    <div class="ks-weather-desc">Aaj dhoop · Shaam ko badal</div>
+                </div>
+                <div class="ks-weather-icon">☀️</div>
+            </div>
+            <div class="ks-weather-details">
+                <div class="ks-wdet"><div class="ks-wdet-l">Nami</div><div class="ks-wdet-v">62%</div></div>
+                <div class="ks-wdet"><div class="ks-wdet-l">Hawa</div><div class="ks-wdet-v">18 km/h</div></div>
+                <div class="ks-wdet"><div class="ks-wdet-l">Barish</div><div class="ks-wdet-v">3 din</div></div>
+            </div>
+        </div>
+        <div class="ks-mandi">
+            <div class="ks-mandi-header">
+                <span class="ks-mandi-title">🏪 Indore Mandi Bhav</span>
+                <span class="ks-mandi-date">Aaj · 10 Jun 2026</span>
+            </div>
+            <div class="ks-mandi-row">
+                <span class="ks-mandi-crop"><em>🌾</em> Gehu</span>
+                <div class="ks-mandi-right"><span class="ks-mandi-price">₹2,395/Q</span><span class="ks-trend up">↑ +2%</span></div>
+            </div>
+            <div class="ks-mandi-row">
+                <span class="ks-mandi-crop"><em>🫘</em> Soyabean</span>
+                <div class="ks-mandi-right"><span class="ks-mandi-price">₹6,700/Q</span><span class="ks-trend up">↑ +5%</span></div>
+            </div>
+            <div class="ks-mandi-row">
+                <span class="ks-mandi-crop"><em>🌽</em> Makka</span>
+                <div class="ks-mandi-right"><span class="ks-mandi-price">₹1,875/Q</span><span class="ks-trend down">↓ -1%</span></div>
+            </div>
+            <div class="ks-mandi-row">
+                <span class="ks-mandi-crop"><em>🟡</em> Chana</span>
+                <div class="ks-mandi-right"><span class="ks-mandi-price">₹5,655/Q</span><span class="ks-trend up">↑ +3%</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ks-two-col">
+        <div class="ks-act">
+            <div class="ks-section-label" style="margin-bottom:10px;">Haali Gatividhi</div>
+            <div class="ks-act-item">
+                <div class="ks-dot d-red"></div>
+                <div><div class="ks-act-text">Gehu mein Powdery Mildew detect hua — spray karo</div><div class="ks-act-time">Aaj, 10:24 AM</div></div>
+            </div>
+            <div class="ks-act-item">
+                <div class="ks-dot d-amber"></div>
+                <div><div class="ks-act-text">Mausam alert — kal tej hawa ka andasha</div><div class="ks-act-time">Aaj, 8:00 AM</div></div>
+            </div>
+            <div class="ks-act-item">
+                <div class="ks-dot d-green"></div>
+                <div><div class="ks-act-text">Soyabean scan — fasal bilkul theek hai</div><div class="ks-act-time">Kal, 4:15 PM</div></div>
+            </div>
+        </div>
+        <div class="ks-act">
+            <div class="ks-section-label" style="margin-bottom:10px;">Fasal Ki Halat</div>
+            <div class="ks-act-item">
+                <div class="ks-dot d-red"></div>
+                <div><div class="ks-act-text"><strong>Gehu</strong> — Bimari alert active, spray zaroori</div><div class="ks-act-time">1.5 Bigha · Khet 1</div></div>
+            </div>
+            <div class="ks-act-item">
+                <div class="ks-dot d-green"></div>
+                <div><div class="ks-act-text"><strong>Soyabean</strong> — Bilkul theek, paidawar achhi</div><div class="ks-act-time">2 Bigha · Khet 2</div></div>
+            </div>
+            <div class="ks-act-item">
+                <div class="ks-dot d-amber"></div>
+                <div><div class="ks-act-text"><strong>Makka</strong> — Sinchai ki zaroorat hai aaj</div><div class="ks-act-time">1 Bigha · Khet 1</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ks-action-bar">
+        <a href="/disease" class="ks-btn-primary">🔬 Bimari Scan Karo</a>
+        <a href="/weather" class="ks-btn-secondary">🌦 Mausam Dekho</a>
+        <a href="/" class="ks-btn-secondary">⬅ Home Jao</a>
+    </div>
+
+</main>
+
+<script>
+const ksHamburger = document.getElementById('ksHamburger');
+const ksNav = document.getElementById('ksNav');
+ksHamburger.addEventListener('click', () => {
+    ksHamburger.classList.toggle('open');
+    ksNav.classList.toggle('open');
+});
+</script>
 
 </body>
 </html>
