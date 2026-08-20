@@ -2,7 +2,7 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# 🏠 Home Page
+
 @app.route("/")
 def home():
     data = {
