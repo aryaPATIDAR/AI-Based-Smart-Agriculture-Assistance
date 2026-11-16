@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kisan Profile – KisanSmart</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        body { background: #f4f7f0; }
+
+        .profile-wrap {
+            max-width: 860px;
+            margin: 32px auto;
+            padding: 0 20px 60px;
+        }
+
+        .profile-header {
+            background: #27500a;
+            border-radius: 16px;
+            padding: 28px 32px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .profile-photo-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .profile-photo-wrap img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #97c459;
+        }
+
+        .photo-edit-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #1d9e75;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+        }
+
+        .profile-header-info h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #c0dd97;
+            margin-bottom: 4px;
+        }
+
+        .profile-header-info p {
+            font-size: 13px;
+            color: #97c459;
+        }
+
+        .profile-card {
+            background: #ffffff;
+            border: 1px solid #d4e8c0;
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+        }
+
+        .profile-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #173404;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #edf5e4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #5a7a42;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 14px;
+            border: 1px solid #d4e8c0;
+            border-radius: 9px;
+            font-size: 14px;
+            color: #173404;
+            background: #f9fdf5;
+            outline: none;
+            transition: border 0.15s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #639922;
+            background: #ffffff;
+        }
+
+        .crop-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .crop-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f4f7f0;
+            border: 1px solid #d4e8c0;
+            border-radius: 9px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .crop-item:hover { background: #eaf3de; }
+
+        .crop-item input[type="checkbox"] {
+            accent-color: #639922;
+            width: 16px;
+            height: 16px;
+        }
+
+        .crop-item label {
+            font-size: 13px;
+            color: #173404;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 14px;
+            background: #27500a;
+            color: #c0dd97;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            font-family: 'Segoe UI', sans-serif;
+            margin-top: 8px;
+        }
+
+        .save-btn:hover { background: #3b6d11; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #639922;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover { color: #27500a; }
+
+        .success-msg {
+            background: #eaf3de;
+            border: 1px solid #97c459;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #27500a;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 700px) {
+            .form-row { grid-template-columns: 1fr; }
+            .form-row-3 { grid-template-columns: 1fr; }
+            .crop-grid { grid-template-columns: repeat(2, 1fr); }
+            .profile-card { padding: 20px 16px; }
+            .profile-header { padding: 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+    <div class="nav-logo">
+        <div class="nav-logo-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2C10 2 5 5.5 5 10.5C5 13.5 7.2 16 10 16C12.8 16 15 13.5 15 10.5C15 5.5 10 2Z" fill="white" fill-opacity="0.9"/>
+                <circle cx="10" cy="11" r="2.5" fill="#1d9e75"/>
+            </svg>
+        </div>
+        <span class="nav-brand">Smart<span class="brand-green"> Kisan</span></span>
+    </div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/farmer">Dashboard</a>
+        <a href="/disease">Bimari</a>
+        <a href="/weather">Mausam</a>
+    </div>
+    <div class="nav-actions">
+        <a href="/farmer" class="btn-green-nav">← Dashboard</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/">Home</a>
+        <a href="/farmer">Dashboard</a>
+        <a href="/disease">Bimari</a>
+        <a href="/weather">Mausam</a>
+        <a href="/farmer" class="btn-green-nav" style="margin:8px 14px;">← Dashboard</a>
+    </div>
+</nav>
+
+<div class="profile-wrap">
+
+    <a href="/farmer" class="back-link">
+        <i class="ti ti-arrow-left"></i> Farmer Dashboard pe wapas
+    </a>
+
+    <!-- Success message -->
+    <div class="success-msg" id="successMsg">
+        <i class="ti ti-circle-check"></i> Profile safaltapoorvak save ho gaya!
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" id="profileForm">
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-photo-wrap">
+                <img id="preview"
+                     src="{{ kisan.profile_photo if kisan and kisan.profile_photo else 'https://ui-avatars.com/api/?name=' + (kisan.naam if kisan and kisan.naam else 'Kisan') + '&background=27500a&color=c0dd97&size=100' }}"
+                     alt="Profile Photo">
+                <button type="button" class="photo-edit-btn" onclick="document.getElementById('photoInput').click()">
+                    <i class="ti ti-pencil"></i>
+                </button>
+                <input type="file" name="photo" id="photoInput" accept="image/*" style="display:none">
+            </div>
+            <div class="profile-header-info">
+                <h2>{{ kisan.naam if kisan and kisan.naam else 'Aapka Naam' }}</h2>
+
+            </div>
+        </div>
+
+        <!-- Personal Info -->
+        <div class="profile-card">
+            <h3><i class="ti ti-user"></i> Personal Jankari</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Poora Naam</label>
+                    <input type="text" name="name" placeholder="Ramesh Kumar Patel"
+                           value="{{ kisan.naam if kisan and kisan.naam else '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" name="phone" placeholder="9876543210" maxlength="10"
+       value="{{ kisan.mobile if kisan and kisan.mobile else '' }}"
+       readonly style="background:#e8f0e0; cursor:not-allowed; color:#5a7a42;">
+                </div>
+            </div>
+
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>Gaon / Village</label>
+                    <input type="text" name="village" placeholder="Sehore"
+                           value="{{ kisan.village if kisan and kisan.village else '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Jila / District</label>
+                    <input type="text" name="district" placeholder="Indore"
+                           value="{{ kisan.district if kisan and kisan.district else '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Rajya / State</label>
+                    <input type="text" name="state" placeholder="Madhya Pradesh"
+                           value="{{ kisan.state if kisan and kisan.state else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Farm Info -->
+        <div class="profile-card">
+            <h3><i class="ti ti-plant-2"></i> Khet ki Jankari</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Kul Zameen (Bigha)</label>
+                    <input type="number" step="0.1" name="land" placeholder="4.5"
+                           value="{{ kisan.zameen_bigha if kisan and kisan.zameen_bigha else '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Mukhya Fasal</label>
+                    <input type="text" name="main_crop" placeholder="Gehu"
+                           value="{{ kisan.main_crop if kisan and kisan.main_crop else '' }}">
+                </div>
+            </div>
+
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>Mitti ka Prakar</label>
+                    <select name="soil_type">
+                        <option value="">Chunein</option>
+                        <option value="Black Soil" {% if kisan and kisan.soil_type == 'Black Soil' %}selected{% endif %}>Kali Mitti (Black)</option>
+                        <option value="Red Soil" {% if kisan and kisan.soil_type == 'Red Soil' %}selected{% endif %}>Lal Mitti (Red)</option>
+                        <option value="Loamy Soil" {% if kisan and kisan.soil_type == 'Loamy Soil' %}selected{% endif %}>Domat Mitti (Loamy)</option>
+                        <option value="Sandy Soil" {% if kisan and kisan.soil_type == 'Sandy Soil' %}selected{% endif %}>Reti Mitti (Sandy)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sinchai Ka Tarika</label>
+                    <select name="irrigation">
+                        <option value="">Chunein</option>
+                        <option value="Drip" {% if kisan and kisan.irrigation == 'Drip' %}selected{% endif %}>Drip Irrigation</option>
+                        <option value="Sprinkler" {% if kisan and kisan.irrigation == 'Sprinkler' %}selected{% endif %}>Sprinkler</option>
+                        <option value="Canal" {% if kisan and kisan.irrigation == 'Canal' %}selected{% endif %}>Nahar (Canal)</option>
+                        <option value="Rain Water" {% if kisan and kisan.irrigation == 'Rain Water' %}selected{% endif %}>Baarish ka Paani</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Anubhav (Saal)</label>
+                    <input type="number" name="experience" placeholder="10"
+                           value="{{ kisan.experience if kisan and kisan.experience else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Crops -->
+        <div class="profile-card">
+            <h3><i class="ti ti-leaf"></i> Ugayi Jaane Wali Fasalein</h3>
+            <div class="crop-grid">
+                <div class="crop-item">
+                    <input type="checkbox" name="crops" value="Gehu" id="c1">
+                    <label for="c1">🌾 Gehu</label>
+                </div>
+                <div class="crop-item">
+                    <input type="checkbox" name="crops" value="Soyabean" id="c2">
+                    <label for="c2">🫘 Soyabean</label>
+                </div>
+                <div class="crop-item">
+                    <input type="checkbox" name="crops" value="Makka" id="c3">
+                    <label for="c3">🌽 Makka</label>
+                </div>
+                <div class="crop-item">
+                    <input type="checkbox" name="crops" value="Chana" id="c4">
+                    <label for="c4">🟡 Chana</label>
+                </div>
+                <div class="crop-item">
+                    <input type="checkbox" name="crops" value="Sarso" id="c5">
+                    <label for="c5">🌻 Sarso</label>
+                </div>
+                <div class="crop-item">
+                    <input type="checkbox" name="crops" value="Dhan" id="c6">
+                    <label for="c6">🌱 Dhan</label>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="save-btn">
+            <i class="ti ti-device-floppy"></i> Profile Save Karein
+        </button>
+
+    </form>
+</div>
+
+<script>
+// Photo preview
+document.getElementById('photoInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('preview').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Success message
+document.getElementById('profileForm').addEventListener('submit', function() {
+    setTimeout(() => {
+        const msg = document.getElementById('successMsg');
+        msg.style.display = 'flex';
+        setTimeout(() => msg.style.display = 'none', 3000);
+    }, 500);
+});
+
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const nav = hamburger.closest('nav');
+hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    nav.classList.toggle('open');
+});
+</script>
+
+</body>
+</html>

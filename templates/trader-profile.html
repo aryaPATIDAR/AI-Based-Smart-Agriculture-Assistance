@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trader Profile | KisanSmart</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 30px 16px; background: #f4f7f3; color: #26352c; font-family: Arial, sans-serif; }
+        .wrap { max-width: 760px; margin: 0 auto; }
+        .back { display: inline-flex; gap: 8px; align-items: center; margin-bottom: 20px; color: #168653; text-decoration: none; font-size: 13px; font-weight: 600; }
+        .header { display: flex; align-items: center; gap: 18px; padding: 26px; border-radius: 15px; color: white; background: linear-gradient(110deg,#145c3b,#269a62); margin-bottom: 20px; }
+        .avatar { width: 76px; height: 76px; flex: 0 0 76px; border-radius: 50%; display: grid; place-items: center; background: white; color: #168653; font-size: 30px; font-weight: bold; }
+        .header h1 { margin: 0 0 7px; font-size: 22px; }
+        .header p { margin: 0; color: #d7f2e1; font-size: 13px; }
+        .card { background: white; border: 1px solid #e4ebe5; border-radius: 13px; padding: 25px; margin-bottom: 18px; }
+        .card h2 { margin: 0 0 20px; padding-bottom: 13px; border-bottom: 1px solid #edf1ed; font-size: 16px; color: #145c3b; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
+        .field { display: flex; flex-direction: column; gap: 7px; }
+        .field.full { grid-column: 1 / -1; }
+        label { font-size: 11px; font-weight: bold; color: #65756b; text-transform: uppercase; letter-spacing: .04em; }
+        input { width: 100%; padding: 12px 13px; border: 1px solid #dce7df; border-radius: 8px; font-size: 14px; color: #26352c; outline: none; background: #fbfdfb; }
+        input:focus { border-color: #168653; background: white; }
+        input[readonly] { background: #edf3ef; color: #718078; cursor: not-allowed; }
+        .hint { margin: 7px 0 0; color: #829087; font-size: 11px; }
+        .actions { display: flex; gap: 12px; margin-top: 20px; }
+        .btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; border: 0; border-radius: 8px; padding: 13px 20px; background: #168653; color: white; text-decoration: none; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn:hover { background: #145c3b; }
+        .btn.secondary { background: #e8f5ed; color: #145c3b; }
+        @media(max-width: 560px) { body { padding: 18px 12px; } .grid { grid-template-columns: 1fr; } .field.full { grid-column: auto; } .card { padding: 19px; } .header { padding: 20px; } }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <a href="/trader" class="back"><i class="ti ti-arrow-left"></i> Back to Trader Dashboard</a>
+
+    <div class="header">
+        <div class="avatar">{{ (trader.naam[0] if trader and trader.naam else 'T')|upper }}</div>
+        <div>
+            <h1>{{ trader.naam if trader and trader.naam else 'Trader Profile' }}</h1>
+            <p>Business Account · KisanSmart</p>
+        </div>
+    </div>
+
+    <form method="POST">
+        <section class="card">
+            <h2><i class="ti ti-user"></i> Personal Information</h2>
+            <div class="grid">
+                <div class="field">
+                    <label for="name">Full Name</label>
+                    <input id="name" type="text" name="name" placeholder="Enter your full name" value="{{ trader.naam if trader and trader.naam else '' }}" required>
+                </div>
+                <div class="field">
+                    <label for="phone">Registered Mobile</label>
+                    <input id="phone" type="tel" value="{{ trader.mobile if trader and trader.mobile else (trader.phone if trader and trader.phone else '') }}" readonly>
+                    <p class="hint">Registered mobile number cannot be changed here.</p>
+                </div>
+                <div class="field full">
+                    <label for="email">Email Address</label>
+                    <input id="email" type="email" value="{{ trader.email if trader and trader.email else '' }}" readonly>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2><i class="ti ti-map-pin"></i> Business Location</h2>
+            <div class="grid">
+                <div class="field">
+                    <label for="village">Village / Area</label>
+                    <input id="village" type="text" name="village" placeholder="Enter village or area" value="{{ trader.village if trader and trader.village else '' }}">
+                </div>
+                <div class="field">
+                    <label for="district">District</label>
+                    <input id="district" type="text" name="district" placeholder="Enter district" value="{{ trader.district if trader and trader.district else '' }}">
+                </div>
+                <div class="field">
+                    <label for="state">State</label>
+                    <input id="state" type="text" name="state" placeholder="Enter state" value="{{ trader.state if trader and trader.state else '' }}">
+                </div>
+                <div class="field">
+                    <label for="location">Business Address / Market</label>
+                    <input id="location" type="text" name="location" placeholder="Enter business address or market" value="{{ trader.location if trader and trader.location else '' }}">
+                </div>
+            </div>
+        </section>
+
+        <div class="actions">
+            <button class="btn" type="submit"><i class="ti ti-device-floppy"></i> Save Profile</button>
+            <a class="btn secondary" href="/trader">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

@@ -110,13 +110,6 @@
         }
         .p-otp-inputs input:focus { border-color: #1d9e75; }
 
-        .p-dev-otp {
-            background: #fff8e1; border: 1px solid #ffe082; border-radius: 9px;
-            padding: 10px 14px; font-size: 13px; color: #555;
-            text-align: center; margin-bottom: 8px;
-        }
-        .p-dev-otp strong { color: #1d9e75; font-size: 18px; letter-spacing: 4px; }
-
         .p-resend { font-size: 12px; color: #555; text-align: center; margin-bottom: 16px; }
         .p-resend span { color: #1d9e75; cursor: pointer; font-weight: 500; }
 
@@ -154,6 +147,23 @@
         .p-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
         .p-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; transition: 0.2s; }
         .p-dot.active { background: #1d9e75; width: 20px; border-radius: 4px; }
+
+        .p-google-divider {
+            display: flex; align-items: center; gap: 12px;
+            color: #888; font-size: 11px; margin: 16px 0;
+        }
+        .p-google-divider::before, .p-google-divider::after {
+            content: ""; flex: 1; height: 1px; background: #e5e5e5;
+        }
+        .p-google-btn {
+            width: 100%; padding: 11px 14px; border: 1px solid #dadce0;
+            border-radius: 9px; background: #fff; color: #3c4043;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: background .15s, box-shadow .15s;
+        }
+        .p-google-btn:hover { background: #f8faff; box-shadow: 0 1px 3px rgba(60,64,67,.2); }
+        .p-google-btn img { width: 18px; height: 18px; }
 
         /* Navbar logged in state */
         .nav-user {
@@ -228,13 +238,18 @@
         <!-- LOGIN -->
         <div id="pLoginForm">
             <h2>Welcome Back!</h2>
-            <p class="popup-sub">Mobile number se OTP bhejenge</p>
+            <p class="popup-sub">Email par OTP bhejenge</p>
             <div class="p-error" id="pLoginError"></div>
             <div class="p-field">
-                <label>Mobile Number</label>
-                <input type="tel" id="pLoginMobile" maxlength="10" placeholder="10-digit mobile number">
+                <label>Email</label>
+                <input type="email" id="pLoginEmail" placeholder="aapka@email.com">
             </div>
             <button class="p-btn" onclick="pSendOtp('login')">OTP Bhejo →</button>
+            <div class="p-google-divider">OR</div>
+            <button type="button" class="p-google-btn" onclick="pGoogleLogin()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Continue with Google
+            </button>
             <div class="p-switch">Account nahi hai? <span onclick="pSwitchTab('register')">Register karein</span></div>
         </div>
 
@@ -248,7 +263,11 @@
                 <div class="p-field"><label>Surname *</label><input type="text" id="pLname" placeholder="Yadav"></div>
             </div>
             <div class="p-field">
-                <label>Mobile Number *</label>
+                <label>Email *</label>
+                <input type="email" id="pRegEmail" placeholder="aapka@email.com">
+            </div>
+            <div class="p-field">
+                <label>Mobile Number (optional)</label>
                 <input type="tel" id="pRegMobile" maxlength="10" placeholder="10-digit mobile">
             </div>
             <div class="p-field">
@@ -292,7 +311,12 @@
                     <option value="other">Anya (Other)</option>
                 </select>
             </div>
-            <button class="p-btn" onclick="pSendOtp('register')">OTP Bhejo →</button>
+            <button class="p-btn" id="pRegisterSubmitBtn" onclick="pSendOtp('register')">OTP Bhejo →</button>
+            <div class="p-google-divider">OR</div>
+            <button type="button" class="p-google-btn" onclick="pGoogleLogin()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Continue with Google
+            </button>
             <div class="p-switch">Pehle se account hai? <span onclick="pSwitchTab('login')">Login karein</span></div>
         </div>
     </div>
@@ -304,8 +328,7 @@
             <div class="p-dot active"></div><div class="p-dot"></div>
         </div>
         <h2>OTP Enter Karein</h2>
-        <p class="popup-sub" id="pOtpSub">Aapke number par OTP bheja gaya</p>
-        <div class="p-dev-otp">Development OTP: <strong id="pDevOtp">------</strong></div>
+        <p class="popup-sub" id="pOtpSub">Aapke email par OTP bheja gaya</p>
         <div class="p-otp-inputs">
             <input type="tel" maxlength="1" id="po1" oninput="pOtpMove(this,'po2')">
             <input type="tel" maxlength="1" id="po2" oninput="pOtpMove(this,'po3')">
@@ -382,7 +405,7 @@
         {% if logged_in %}
         <div class="nav-user">
 
-   <a href="/farmer-profile" class="nav-user-id">
+   <a href="{{ '/farmer-profile' if session.get('role') == 'kisan' else '/trader-profile' }}" class="nav-user-id">
     <i class="ti ti-user"></i> PROFILE
 </a>
 
@@ -405,9 +428,9 @@
         <a href="/weather">Weather</a>
         <div class="nav-actions-mobile">
             {% if logged_in %}
-            <a href="/farmer-profile" class="nav-user-id">
+            <a href="{{ '/farmer-profile' if session.get('role') == 'kisan' else '/trader-profile' }}" class="nav-user-id">
                 <i class="ti ti-user"></i>
-                    {{ session.get('user_id', '') }}
+                {{ session.get('user_id', '') }}
             </a>
             <a href="/logout" class="nav-logout">Logout</a>
             {% else %}
@@ -639,16 +662,109 @@ let pRole = null, pMode = 'login', pIdOk = false, session_role = null;
 // ── Role Access ───────────────────────────────────────────────
 const IS_LOGGED_IN = {{ 'true' if logged_in else 'false' }};
 const USER_ROLE = "{{ session.get('role', '') }}";
+const GOOGLE_REGISTRATION_REQUIRED = {{ 'true' if session.get('google_registration_required') else 'false' }};
+const GOOGLE_USER_NAME = {{ session.get('google_name', '') | tojson }};
+const GOOGLE_USER_EMAIL = {{ session.get('email', '') | tojson }};
+
+function pGoogleLogin() {
+    if (!pRole) {
+        pShowErr('pLoginError', 'Pehle Kisan ya Vyapari role chunein.');
+        return;
+    }
+    window.location.href = `/google/login/${encodeURIComponent(pRole)}`;
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+    if (!GOOGLE_REGISTRATION_REQUIRED) return;
+
+    pRole = USER_ROLE;
+    session_role = USER_ROLE;
+    pShowStep('ps2');
+    pSwitchTab('register');
+    document.getElementById('authPopup').classList.remove('hidden');
+
+    if (pRole && document.getElementById('pr-' + pRole)) {
+        document.getElementById('pr-' + pRole).classList.add('active');
+    }
+
+    const nameParts = (GOOGLE_USER_NAME || '').trim().split(/\s+/);
+    document.getElementById('pFname').value = nameParts[0] || '';
+    document.getElementById('pLname').value = nameParts.slice(1).join(' ');
+
+    const emailField = document.getElementById('pRegEmail');
+    emailField.value = GOOGLE_USER_EMAIL || '';
+    emailField.readOnly = true;
+
+    const registerBtn = document.getElementById('pRegisterSubmitBtn');
+    registerBtn.textContent = 'Complete Registration →';
+    registerBtn.onclick = pCompleteGoogleRegistration;
+});
+
+async function pCompleteGoogleRegistration() {
+    pHideErr('pRegError');
+
+    const fname = document.getElementById('pFname').value.trim();
+    const lname = document.getElementById('pLname').value.trim();
+    const state = document.getElementById('pState').value;
+    const district = document.getElementById('pDistrict').value;
+    const gender = document.getElementById('pGender').value;
+
+    if (!fname || !lname || !state || !district || !gender) {
+        pShowErr('pRegError', 'Saari starred (*) fields bharein');
+        return;
+    }
+
+    const body = {
+        first_name: fname,
+        last_name: lname,
+        mobile: document.getElementById('pRegMobile').value.trim(),
+        city: district,
+        village: document.getElementById('pVillage').value.trim(),
+        state: state,
+        gender: gender
+    };
+
+    const button = document.getElementById('pRegisterSubmitBtn');
+    button.disabled = true;
+    try {
+        const res = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+            pShowStep('ps4');
+        } else {
+            pShowErr('pRegError', data.message || 'Registration nahi ho paya.');
+        }
+    } catch (error) {
+        pShowErr('pRegError', 'Server se connection nahi hua');
+    } finally {
+        button.disabled = false;
+    }
+}
+
 
 function handleRoleClick(e, role) {
     e.preventDefault();
+
+    // Logged-in user ko hamesha uske account ke actual role wale dashboard par bhejo.
     if (IS_LOGGED_IN) {
-        window.location.href = role === 'kisan' ? '/farmer' : '/trader';
-    } else {
-        pSelectRole(role);
-        pShowStep('ps2'); // ← ps1 se ps2 kiya
-        document.getElementById('authPopup').classList.remove('hidden');
+        if (USER_ROLE === 'kisan') {
+            window.location.href = '/farmer';
+        } else if (USER_ROLE === 'vyapari') {
+            window.location.href = '/trader';
+        } else {
+            window.location.href = '/';
+        }
+        return;
     }
+
+    // New login/register ke liye user ka selected role set karo.
+    pSelectRole(role);
+    pShowStep('ps2');
+    document.getElementById('authPopup').classList.remove('hidden');
 }
 
 // ── Auth Popup ────────────────────────────────────────────────
@@ -697,11 +813,15 @@ function pHideOk(id) { document.getElementById(id).style.display = 'none'; }
 
 async function pSendOtp(mode) {
     pMode = mode;
-    const mobile = mode === 'login'
-        ? document.getElementById('pLoginMobile').value
-        : document.getElementById('pRegMobile').value;
-    if (mobile.length !== 10 || isNaN(mobile)) {
-        pShowErr(mode === 'login' ? 'pLoginError' : 'pRegError', 'Sahi 10-digit mobile number dalein');
+    const errId = mode === 'login' ? 'pLoginError' : 'pRegError';
+    pHideErr(errId);
+
+    const email = (mode === 'login'
+        ? document.getElementById('pLoginEmail').value
+        : document.getElementById('pRegEmail').value).trim().toLowerCase();
+
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        pShowErr(errId, 'Sahi email address dalein');
         return;
     }
     if (mode === 'register') {
@@ -717,20 +837,19 @@ async function pSendOtp(mode) {
     try {
         const res  = await fetch('/send-otp', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mobile, role: pRole })
+            body: JSON.stringify({ email, role: pRole, mode })
         });
         const data = await res.json();
         if (data.success) {
-            document.getElementById('pDevOtp').textContent  = data.dev_otp;
-            document.getElementById('pOtpSub').textContent  = mobile + ' par OTP bheja gaya';
+            document.getElementById('pOtpSub').textContent = email + ' par OTP bheja gaya';
             ['po1','po2','po3','po4','po5','po6'].forEach(id => document.getElementById(id).value = '');
             pHideErr('pOtpError');
             pShowStep('ps3');
             document.getElementById('po1').focus();
         } else {
-            pShowErr(mode === 'login' ? 'pLoginError' : 'pRegError', data.message);
+            pShowErr(errId, data.message);
         }
-    } catch(e) { pShowErr(mode === 'login' ? 'pLoginError' : 'pRegError', 'Server se connection nahi hua'); }
+    } catch(e) { pShowErr(errId, 'Server se connection nahi hua'); }
 }
 
 function pOtpMove(el, nextId) {
@@ -757,6 +876,7 @@ async function pRegisterUser() {
     const body = {
         first_name : document.getElementById('pFname').value.trim(),
         last_name  : document.getElementById('pLname').value.trim(),
+        mobile     : document.getElementById('pRegMobile').value.trim(),
         city       : document.getElementById('pDistrict').value,
         village    : document.getElementById('pVillage').value.trim(),
         state      : document.getElementById('pState').value,
@@ -782,6 +902,8 @@ async function pLoginUser() {
         document.getElementById('pSuccessTitle').textContent = 'Login Safal!';
         document.getElementById('pSuccessSub').textContent   = 'KisanSmart mein swagat hai!';
         pShowStep('ps5');
+        // Role DB se verify karke correct dashboard par bhejo.
+        session_role = data.role;
     } else { pShowErr('pOtpError', data.message); }
 }
 
@@ -834,29 +956,25 @@ async function pSaveId() {
 }
 
 async function pResendOtp() {
-    const mobile = pMode === 'login'
-        ? document.getElementById('pLoginMobile').value
-        : document.getElementById('pRegMobile').value;
-    const res  = await fetch('/send-otp', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile, role: pRole })
-    });
-    const data = await res.json();
-    if (data.success) { document.getElementById('pDevOtp').textContent = data.dev_otp; alert('OTP dobara bheja gaya!'); }
+    const email = (pMode === 'login'
+        ? document.getElementById('pLoginEmail').value
+        : document.getElementById('pRegEmail').value).trim().toLowerCase();
+
+    try {
+        const res  = await fetch('/send-otp', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, role: pRole, mode: pMode })
+        });
+        const data = await res.json();
+        alert(data.message);
+    } catch(e) { alert('Server se connection nahi hua'); }
 }
 
 function pGoBack() { pShowStep('ps2'); }
 
 function closePopup() {
     document.getElementById('authPopup').classList.add('hidden');
-    const role = session_role || USER_ROLE;
-    if (role === 'kisan') {
-        window.location.href = '/farmer';
-    } else if (role === 'vyapari') {
-        window.location.href = '/trader';
-    } else {
-        window.location.reload();
-    }
+    window.location.href = '/post-login';
 }
 
 // ── Review Popup ──────────────────────────────────────────────

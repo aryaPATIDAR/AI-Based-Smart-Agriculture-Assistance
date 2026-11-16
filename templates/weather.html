@@ -1,20 +1,585 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Weather</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard | KisanSmart</title>
+
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f3f7f4;
+            color: #1d3027;
+            font-family: Arial, sans-serif;
+        }
+
+        .weather-navbar {
+            background: #267c42;
+            color: white;
+            padding: 16px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .weather-navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .brand {
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .brand span {
+            color: #b5f0c3;
+        }
+
+        .weather-container {
+            max-width: 1150px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .heading {
+            margin-bottom: 25px;
+        }
+
+        .heading h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .heading p {
+            color: #718078;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid #d8e4da;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-box button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #25864b;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .search-box button:hover {
+            background: #176b39;
+        }
+
+        .weather-main {
+            background: linear-gradient(120deg, #176b3b, #42a76a);
+            color: white;
+            border-radius: 20px;
+            padding: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 260px;
+            box-shadow: 0 8px 25px #00000012;
+        }
+
+        .city-name {
+            font-size: 25px;
+            margin-bottom: 10px;
+        }
+
+        .temperature {
+            font-size: 65px;
+            font-weight: bold;
+        }
+
+        .condition {
+            font-size: 18px;
+            margin-top: 8px;
+        }
+
+        .weather-icon {
+            font-size: 110px;
+        }
+
+        .section-title {
+            margin: 30px 0 18px;
+            font-size: 21px;
+        }
+
+        .weather-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 17px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 23px;
+            border: 1px solid #e3ebe5;
+            transition: 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 7px 20px #0000000d;
+        }
+
+        .stat-icon {
+            font-size: 25px;
+            color: #269653;
+            margin-bottom: 15px;
+        }
+
+        .stat-card p {
+            color: #78857c;
+            font-size: 14px;
+        }
+
+        .stat-card h3 {
+            font-size: 23px;
+            margin-top: 8px;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .forecast-card {
+            background: white;
+            border: 1px solid #e3ebe5;
+            border-radius: 15px;
+            padding: 22px 10px;
+            text-align: center;
+        }
+
+        .forecast-card i {
+            display: block;
+            font-size: 35px;
+            color: #e7a72e;
+            margin: 15px 0;
+        }
+
+        .forecast-card h3 {
+            font-size: 21px;
+            margin-bottom: 5px;
+        }
+
+        .forecast-card p {
+            color: #78857c;
+            font-size: 13px;
+        }
+
+        .weather-message {
+            margin-top: 25px;
+            padding: 18px;
+            background: #e4f5e9;
+            border-left: 4px solid #269653;
+            border-radius: 10px;
+            color: #23663c;
+        }
+
+        .error-message {
+            color: #b42318;
+            background: #feeceb;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #7b887e;
+            margin-top: 35px;
+        }
+
+        @media(max-width: 750px) {
+            .weather-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .forecast-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .weather-main {
+                padding: 25px;
+            }
+
+            .temperature {
+                font-size: 48px;
+            }
+
+            .weather-icon {
+                font-size: 70px;
+            }
+        }
+
+        @media(max-width: 450px) {
+            .weather-navbar {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .weather-main {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>🌦 Weather Info</h1>
+<nav class="weather-navbar">
+    <div class="brand">
+        Kisan<span>Smart</span>
+    </div>
 
-<div class="grid">
-    <div class="box">Temperature: 28°C</div>
-    <div class="box">Humidity: 60%</div>
-    <div class="box">Rain: No</div>
+    <div>
+        <a href="/">Home</a>
+        <a href="/farmer">Dashboard</a>
+    </div>
+</nav>
+
+<div class="weather-container">
+
+    <div class="heading">
+        <h1>Weather Dashboard</h1>
+        <p>Check weather conditions and plan your farming activities.</p>
+    </div>
+
+    <div class="search-box">
+        <input
+            type="text"
+            id="cityInput"
+            placeholder="Enter city name (e.g. Indore)"
+            value="Indore"
+        >
+
+        <button onclick="getWeather()">
+            <i class="ti ti-search"></i> Search
+        </button>
+
+        <button onclick="getLocation()">
+            <i class="ti ti-current-location"></i> My Location
+        </button>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <section class="weather-main">
+
+        <div>
+            <h2 class="city-name" id="cityName">Search a city</h2>
+
+            <div class="temperature" id="temperature">--°C</div>
+
+            <div class="condition" id="condition">
+                Weather information will appear here
+            </div>
+
+            <p style="margin-top:15px;" id="weatherDate"></p>
+        </div>
+
+        <div class="weather-icon">
+            <i class="ti ti-cloud-sun" id="mainWeatherIcon"></i>
+        </div>
+
+    </section>
+
+    <h2 class="section-title">Weather Details</h2>
+
+    <section class="weather-stats">
+
+        <div class="stat-card">
+            <div class="stat-icon"><i class="ti ti-droplet"></i></div>
+            <p>Humidity</p>
+            <h3 id="humidity">--%</h3>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon"><i class="ti ti-wind"></i></div>
+            <p>Wind Speed</p>
+            <h3 id="windSpeed">-- km/h</h3>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon"><i class="ti ti-gauge"></i></div>
+            <p>Pressure</p>
+            <h3 id="pressure">-- hPa</h3>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon"><i class="ti ti-eye"></i></div>
+            <p>Visibility</p>
+            <h3 id="visibility">-- km</h3>
+        </div>
+
+    </section>
+
+    <h2 class="section-title">5-Day Forecast</h2>
+
+    <section class="forecast-grid" id="forecastGrid">
+
+        <div class="forecast-card">
+            <p>Forecast data</p>
+            <i class="ti ti-cloud-sun"></i>
+            <h3>--°C</h3>
+            <p>Waiting for data</p>
+        </div>
+
+        <div class="forecast-card">
+            <p>Forecast data</p>
+            <i class="ti ti-cloud"></i>
+            <h3>--°C</h3>
+            <p>Waiting for data</p>
+        </div>
+
+        <div class="forecast-card">
+            <p>Forecast data</p>
+            <i class="ti ti-sun"></i>
+            <h3>--°C</h3>
+            <p>Waiting for data</p>
+        </div>
+
+        <div class="forecast-card">
+            <p>Forecast data</p>
+            <i class="ti ti-cloud-rain"></i>
+            <h3>--°C</h3>
+            <p>Waiting for data</p>
+        </div>
+
+        <div class="forecast-card">
+            <p>Forecast data</p>
+            <i class="ti ti-cloud-sun"></i>
+            <h3>--°C</h3>
+            <p>Waiting for data</p>
+        </div>
+
+    </section>
+
+    <div class="weather-message">
+        <strong><i class="ti ti-leaf"></i> Farming Advisory</strong>
+        <p id="farmingAdvice" style="margin-top:8px;">
+            Weather information milne ke baad farming advisory yahan dikhegi.
+        </p>
+    </div>
+
 </div>
 
-<a href="/">⬅ Back</a>
+<footer>
+    KisanSmart | Smart Weather Advisory for Farmers
+</footer>
+
+<script>
+
+    async function getWeather(city = null) {
+
+        const cityName = city || document.getElementById("cityInput").value.trim();
+
+        if (!cityName) {
+            showError("Please enter a city name.");
+            return;
+        }
+
+        const container = document.querySelector(".weather-container");
+
+        container.classList.add("loading");
+
+        document.getElementById("errorMessage").style.display = "none";
+
+        try {
+
+            const response = await fetch(
+                `/weather-data?city=${encodeURIComponent(cityName)}`
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Weather data not available.");
+            }
+
+            document.getElementById("cityName").innerText = data.city;
+            document.getElementById("temperature").innerText =
+                `${data.temperature}°C`;
+
+            document.getElementById("condition").innerText = data.condition;
+
+            document.getElementById("humidity").innerText =
+                `${data.humidity}%`;
+
+            document.getElementById("windSpeed").innerText =
+                `${data.wind_speed} km/h`;
+
+            document.getElementById("pressure").innerText =
+                `${data.pressure} hPa`;
+
+            document.getElementById("visibility").innerText =
+                `${data.visibility} km`;
+
+            document.getElementById("weatherDate").innerText =
+                new Date().toLocaleString();
+
+            updateIcon(data.condition);
+
+            if (data.forecast) {
+                showForecast(data.forecast);
+            }
+
+            if (data.advisory) {
+                document.getElementById("farmingAdvice").innerText =
+                    data.advisory;
+            }
+
+            document.getElementById("cityInput").value = data.city;
+
+        } catch (error) {
+
+            showError(error.message);
+
+        } finally {
+
+            container.classList.remove("loading");
+
+        }
+    }
+
+
+    function updateIcon(condition) {
+
+        const icon = document.getElementById("mainWeatherIcon");
+
+        const value = condition.toLowerCase();
+
+        if (value.includes("rain")) {
+            icon.className = "ti ti-cloud-rain";
+        } else if (value.includes("cloud")) {
+            icon.className = "ti ti-cloud";
+        } else if (value.includes("clear") || value.includes("sun")) {
+            icon.className = "ti ti-sun";
+        } else if (value.includes("storm")) {
+            icon.className = "ti ti-cloud-storm";
+        } else {
+            icon.className = "ti ti-cloud-sun";
+        }
+    }
+
+
+    function showForecast(forecast) {
+
+        const grid = document.getElementById("forecastGrid");
+
+        grid.innerHTML = "";
+
+        forecast.forEach(day => {
+
+            const card = document.createElement("div");
+
+            card.className = "forecast-card";
+
+            const dayName = document.createElement("p");
+            dayName.textContent = day.day;
+
+            const icon = document.createElement("i");
+            icon.className = "ti ti-cloud-sun";
+
+            const temp = document.createElement("h3");
+            temp.textContent = `${day.temperature}°C`;
+
+            const condition = document.createElement("p");
+            condition.textContent = day.condition;
+
+            card.append(dayName, icon, temp, condition);
+
+            grid.appendChild(card);
+
+        });
+    }
+
+
+    function showError(message) {
+
+        const error = document.getElementById("errorMessage");
+
+        error.innerText = message;
+        error.style.display = "block";
+    }
+
+
+    function getLocation() {
+
+        if (!navigator.geolocation) {
+            showError("Your browser does not support location.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+
+            position => {
+
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                getWeather(`${lat},${lon}`);
+
+            },
+
+            () => {
+                showError("Location permission denied.");
+            }
+
+        );
+    }
+
+
+    document.getElementById("cityInput").addEventListener("keypress", function(event) {
+
+        if (event.key === "Enter") {
+            getWeather();
+        }
+
+    });
+
+</script>
 
 </body>
 </html>

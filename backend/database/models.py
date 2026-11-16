@@ -10,7 +10,11 @@ class Kisan(Base):
     id            = Column(Integer, primary_key=True, index=True)
     user_id       = Column(String, unique=True, nullable=True, index=True)
     mobile        = Column(String, unique=True, nullable=True, index=True)
+
+    email         = Column(String, unique=True, nullable=True, index=True)  # <- ye nayi line
     first_name    = Column(String, nullable=True)
+
+
     last_name     = Column(String, nullable=True)
     naam          = Column(String, nullable=True)   # first+last ka combined (display ke liye)
     gender        = Column(String, nullable=True)

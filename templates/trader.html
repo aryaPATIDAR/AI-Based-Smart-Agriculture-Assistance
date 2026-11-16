@@ -1,93 +1,1541 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trader Dashboard</title>
+    <title>KisanSmart | Trader Dashboard</title>
 
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7f3;
+            color: #26352c;
+        }
+
+        :root {
+            --green: #168653;
+            --dark: #145c3b;
+            --light: #e8f5ed;
+            --border: #e4ebe5;
+            --muted: #829087;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 245px;
+            background: #123d2b;
+            color: white;
+            padding: 25px 16px;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: bold;
+            padding: 5px 12px 35px;
+        }
+
+        .logo span {
+            color: #65d59c;
+        }
+
+        .menu-label {
+            font-size: 10px;
+            color: #91b5a0;
+            margin: 22px 12px 12px;
+            letter-spacing: 1.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 13px 14px;
+            margin-bottom: 5px;
+            border-radius: 9px;
+            color: #d0e0d6;
+            cursor: pointer;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .nav-item i {
+            font-size: 18px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: #24744d;
+            color: white;
+        }
+
+        .sidebar-bottom {
+            position: absolute;
+            bottom: 25px;
+            left: 20px;
+            right: 20px;
+        }
+
+        .sidebar-bottom a {
+            color: #d0e0d6;
+            text-decoration: none;
+            display: block;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 245px;
+            width: calc(100% - 245px);
+            padding: 25px 32px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .topbar h2 {
+            font-size: 22px;
+        }
+
+        .topbar p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--light);
+            color: var(--green);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: bold;
+        }
+
+        .profile small {
+            color: var(--muted);
+        }
+
+        /* PAGE */
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: appear .25s ease;
+        }
+
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome {
+            background: linear-gradient(110deg, #176d43, #269a62);
+            border-radius: 16px;
+            color: white;
+            padding: 27px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .welcome h1 {
+            font-size: 25px;
+            margin-bottom: 9px;
+        }
+
+        .welcome p {
+            font-size: 13px;
+            color: #d7f2e1;
+        }
+
+        .welcome i {
+            font-size: 65px;
+            opacity: .7;
+        }
+
+        /* BUTTONS */
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 7px;
+            background: var(--green);
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: var(--dark);
+        }
+
+        .btn-light {
+            background: white;
+            color: var(--green);
+        }
+
+        .btn-danger {
+            background: #fff0ed;
+            color: #d14b3d;
+        }
+
+        /* STATS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 17px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: var(--light);
+            color: var(--green);
+            font-size: 20px;
+        }
+
+        .stat-card h2 {
+            margin: 17px 0 5px;
+            font-size: 25px;
+        }
+
+        .stat-card p {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .positive {
+            color: var(--green);
+            font-size: 11px;
+        }
+
+        /* CONTENT GRID */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 18px;
+            margin-bottom: 23px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 21px;
+            margin-bottom: 20px;
+            min-width: 0;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .panel-header h3 {
+            font-size: 15px;
+        }
+
+        .panel-header p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        /* TABLE */
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 550px;
+        }
+
+        th {
+            text-align: left;
+            color: var(--muted);
+            font-size: 11px;
+            padding: 13px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 15px 10px;
+            font-size: 12px;
+            border-bottom: 1px solid #edf1ed;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .available {
+            background: #e6f7ec;
+            color: #168653;
+        }
+
+        .pending {
+            background: #fff3db;
+            color: #bd851f;
+        }
+
+        .delivered {
+            background: #e9efff;
+            color: #4c6bc1;
+        }
+
+        /* SEARCH */
+
+        .search {
+            padding: 10px 13px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            outline: none;
+            font-size: 12px;
+            width: 220px;
+            max-width: 100%;
+        }
+
+        .search:focus {
+            border-color: var(--green);
+        }
+
+        /* INVENTORY */
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .product-card {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .product-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--light);
+            color: var(--green);
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .product-card h3 {
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .product-card p {
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 12px;
+        }
+
+        .product-price {
+            font-size: 19px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* FARMER */
+
+        .farmer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .farmer-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--light);
+            color: var(--green);
+            display: grid;
+            place-items: center;
+        }
+
+        .farmer-info h4 {
+            font-size: 12px;
+        }
+
+        .farmer-info p {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        /* EMPTY */
+
+        .empty {
+            padding: 30px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* MODAL */
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0008;
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            width: 400px;
+            max-width: 100%;
+            padding: 25px;
+            border-radius: 14px;
+        }
+
+        .modal-box h3 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            outline: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* MOBILE */
+
+        .mobile-menu {
+            display: none;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        @media(max-width: 1050px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width: 750px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: .3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px 14px;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome h1 {
+                font-size: 20px;
+            }
+
+            .welcome i {
+                font-size: 40px;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar h2 {
+                font-size: 17px;
+            }
+
+            .profile {
+                display: none;
+            }
+        }
+
+        @media(max-width: 420px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<nav>
-    <div class="nav-logo">
-        <span class="nav-brand">
-            Kisan<span class="brand-green">Smart</span>
-        </span>
-    </div>
+<div class="layout">
 
-    <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/trader">Dashboard</a>
-    </div>
-</nav>
+    <!-- SIDEBAR -->
 
-<section class="hero">
-    <div class="hero-badge">
-        <i class="ti ti-store"></i> Trader Portal
-    </div>
+    <aside class="sidebar" id="sidebar">
 
-    <h1>🧑‍💼 Trader Dashboard</h1>
-
-    <p>
-        Manage crop prices, fertilizer sales and farmer orders from one platform.
-    </p>
-</section>
-
-<div class="container">
-
-    <div class="grid">
-
-        <div class="card">
-            📈 Live Crop Prices
+        <div class="logo">
+            Kisan<span>Smart</span>
         </div>
 
-        <div class="card">
-            🌱 Fertilizer Store
+        <div class="menu-label">MAIN MENU</div>
+
+        <div class="nav-item active" onclick="showPage('dashboard',this)">
+            <i class="ti ti-layout-dashboard"></i> Dashboard
         </div>
 
-        <div class="card">
-            🧪 Pesticide Store
+        <div class="nav-item" onclick="showPage('prices',this)">
+            <i class="ti ti-chart-line"></i> Crop Prices
         </div>
 
-        <div class="card">
-            📦 Orders Management
+        <div class="nav-item" onclick="showPage('inventory',this)">
+            <i class="ti ti-packages"></i> Inventory
         </div>
 
-        <div class="card">
-            👨‍🌾 Farmer Network
+        <div class="nav-item" onclick="showPage('orders',this)">
+            <i class="ti ti-shopping-cart"></i> Orders
         </div>
 
-        <div class="card">
-            💰 Sales Report
+        <div class="nav-item" onclick="showPage('farmers',this)">
+            <i class="ti ti-users"></i> Farmers Network
         </div>
 
-        <div class="card">
-            🚚 Delivery Status
+        <div class="menu-label">BUSINESS</div>
+
+        <div class="nav-item" onclick="showPage('analytics',this)">
+            <i class="ti ti-chart-bar"></i> Analytics
         </div>
 
-        <div class="card">
-            📊 Business Analytics
+        <div class="sidebar-bottom">
+            <a href="/"> <i class="ti ti-home"></i> Back to Home</a>
+            <a href="/logout"><i class="ti ti-logout"></i> Logout</a>
         </div>
 
-    </div>
+    </aside>
 
-    <div class="tips">
-        <h3>📢 Business Tip</h3>
 
-        <p>
-            Update crop prices regularly and keep fertilizer stock available to attract more farmers.
-        </p>
-    </div>
+    <!-- MAIN CONTENT -->
 
-    <div style="text-align:center; margin-top:30px;">
-        <a href="/" class="back-btn">
-            ⬅ Back Home
-        </a>
+    <main class="main">
+
+        <header class="topbar">
+
+            <div style="display:flex;align-items:center;gap:15px">
+
+                <i class="ti ti-menu-2 mobile-menu"
+                   onclick="toggleSidebar()"></i>
+
+                <div>
+                    <h2 id="pageTitle">Dashboard Overview</h2>
+                    <p>Manage your agricultural business efficiently.</p>
+                </div>
+
+            </div>
+
+            <a class="profile" href="/trader-profile" style="text-decoration:none;color:inherit;" title="View / Edit Profile">
+                <div class="avatar">T</div>
+                <div>
+                    <strong>Trader</strong><br>
+                    <small>Business Account · Edit Profile</small>
+                </div>
+            </a>
+
+        </header>
+
+
+        <!-- DASHBOARD PAGE -->
+
+        <section class="page active" id="dashboard">
+
+            <div class="welcome">
+                <div>
+                    <h1>Welcome to Trader Portal</h1>
+                    <p>Manage crop prices, products and farmer orders from one place.</p>
+                </div>
+
+                <i class="ti ti-building-store"></i>
+            </div>
+
+
+            <div class="stats">
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon"><i class="ti ti-currency-rupee"></i></span>
+                        <span class="positive">+12.5%</span>
+                    </div>
+                    <h2 id="revenue">₹1,25,000</h2>
+                    <p>Total Revenue</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon"><i class="ti ti-shopping-bag"></i></span>
+                        <span class="positive">Active</span>
+                    </div>
+                    <h2 id="orderCount">48</h2>
+                    <p>Total Orders</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon"><i class="ti ti-users"></i></span>
+                        <span class="positive">Connected</span>
+                    </div>
+                    <h2 id="farmerCount">126</h2>
+                    <p>Connected Farmers</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon"><i class="ti ti-package"></i></span>
+                        <span class="positive">Available</span>
+                    </div>
+                    <h2 id="productCount">18</h2>
+                    <p>Products Listed</p>
+                </div>
+
+            </div>
+
+
+            <div class="content-grid">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Revenue Overview</h3>
+                            <p>Monthly business performance (sample data)</p>
+                        </div>
+                    </div>
+
+                    <canvas id="revenueChart" height="125"></canvas>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Recent Orders</h3>
+                            <p>Latest farmer purchases</p>
+                        </div>
+
+                        <button class="btn" onclick="showPage('orders')">
+                            View All
+                        </button>
+                    </div>
+
+                    <div id="recentOrders"></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>Crop Market Prices</h3>
+                        <p>Indicative sample prices per quintal</p>
+                    </div>
+
+                    <button class="btn" onclick="showPage('prices')">
+                        Manage Prices
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Crop</th>
+                                <th>Market Price</th>
+                                <th>Change</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardPrices"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CROP PRICES PAGE -->
+
+        <section class="page" id="prices">
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>Crop Price Management</h3>
+                        <p>Manage your listed crop prices</p>
+                    </div>
+
+                    <button class="btn" onclick="openPriceModal()">
+                        + Add Crop
+                    </button>
+                </div>
+
+                <input class="search"
+                       id="priceSearch"
+                       placeholder="Search crop..."
+                       oninput="renderPrices()">
+
+                <div class="table-wrap" style="margin-top:20px">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Crop Name</th>
+                                <th>Price / Quintal</th>
+                                <th>Market Change</th>
+                                <th>Availability</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="priceTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- INVENTORY PAGE -->
+
+        <section class="page" id="inventory">
+
+            <div class="panel-header">
+                <div>
+                    <h3>Product Inventory</h3>
+                    <p>Manage fertilizers and pesticides</p>
+                </div>
+
+                <button class="btn" onclick="openProductModal()">
+                    + Add Product
+                </button>
+            </div>
+
+            <div class="product-grid" id="productGrid"></div>
+
+        </section>
+
+
+        <!-- ORDERS PAGE -->
+
+        <section class="page" id="orders">
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>Order Management</h3>
+                        <p>Track and manage farmer orders</p>
+                    </div>
+
+                    <input class="search"
+                           placeholder="Search farmer..."
+                           id="orderSearch"
+                           oninput="renderOrders()">
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Farmer</th>
+                                <th>Product</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="orderTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FARMERS PAGE -->
+
+        <section class="page" id="farmers">
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>Farmer Network</h3>
+                        <p>Connected farmers (sample records)</p>
+                    </div>
+                </div>
+
+                <div id="farmerList"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ANALYTICS PAGE -->
+
+        <section class="page" id="analytics">
+
+            <div class="content-grid">
+
+                <div class="panel">
+                    <h3>Monthly Revenue</h3>
+                    <p style="color:var(--muted);font-size:11px;margin:7px 0 20px">
+                        Sample business data
+                    </p>
+                    <canvas id="analyticsChart" height="180"></canvas>
+                </div>
+
+                <div class="panel">
+                    <h3>Business Summary</h3>
+
+                    <div style="margin-top:25px">
+                        <p style="color:var(--muted);font-size:12px">Total Revenue</p>
+                        <h2 style="margin:8px 0 20px" id="analyticsRevenue">₹1,25,000</h2>
+
+                        <p style="color:var(--muted);font-size:12px">Total Orders</p>
+                        <h2 style="margin:8px 0 20px" id="analyticsOrders">48</h2>
+
+                        <p style="color:var(--muted);font-size:12px">Connected Farmers</p>
+                        <h2 style="margin-top:8px">126</h2>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ADD CROP MODAL -->
+
+<div class="modal" id="priceModal">
+
+    <div class="modal-box">
+
+        <h3>Add Crop Price</h3>
+
+        <div class="form-group">
+            <label>Crop Name</label>
+            <input id="cropName" placeholder="e.g. Wheat">
+        </div>
+
+        <div class="form-group">
+            <label>Price per Quintal (₹)</label>
+            <input id="cropPrice" type="number" min="1" placeholder="2500">
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-danger" onclick="closeModals()">Cancel</button>
+            <button class="btn" onclick="addCrop()">Save Crop</button>
+        </div>
+
     </div>
 
 </div>
+
+
+<!-- ADD PRODUCT MODAL -->
+
+<div class="modal" id="productModal">
+
+    <div class="modal-box">
+
+        <h3>Add Inventory Product</h3>
+
+        <div class="form-group">
+            <label>Product Name</label>
+            <input id="newProduct" placeholder="Product name">
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select id="newCategory">
+                <option>Fertilizer</option>
+                <option>Pesticide</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Price (₹)</label>
+            <input id="newProductPrice" type="number" min="1">
+        </div>
+
+        <div class="form-group">
+            <label>Stock Quantity</label>
+            <input id="newStock" type="number" min="0">
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-danger" onclick="closeModals()">Cancel</button>
+            <button class="btn" onclick="addProduct()">Save Product</button>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // SAMPLE DATA - BACKEND DATABASE NOT CONNECTED YET
+
+    let crops = [
+        {name:"Wheat",price:2600,change:"+4.2%",status:"Available"},
+        {name:"Soybean",price:4500,change:"+2.1%",status:"Available"},
+        {name:"Maize",price:2200,change:"-1.2%",status:"Available"},
+        {name:"Rice",price:3100,change:"+3.5%",status:"Available"},
+        {name:"Mustard",price:5700,change:"+5.1%",status:"Available"}
+    ];
+
+    let products = [
+        {name:"Urea Fertilizer",category:"Fertilizer",price:270,stock:120},
+        {name:"DAP Fertilizer",category:"Fertilizer",price:1350,stock:65},
+        {name:"Organic Compost",category:"Fertilizer",price:450,stock:90},
+        {name:"Neem Pesticide",category:"Pesticide",price:350,stock:45},
+        {name:"Crop Protection Spray",category:"Pesticide",price:550,stock:30}
+    ];
+
+    let orders = [
+        {id:"KS101",farmer:"Ramesh Patidar",product:"Urea Fertilizer",amount:2700,status:"Pending"},
+        {id:"KS102",farmer:"Mohan Singh",product:"DAP Fertilizer",amount:4050,status:"Processing"},
+        {id:"KS103",farmer:"Suresh Verma",product:"Neem Pesticide",amount:1750,status:"Delivered"},
+        {id:"KS104",farmer:"Rajesh Patel",product:"Organic Compost",amount:2250,status:"Pending"},
+        {id:"KS105",farmer:"Amit Sharma",product:"Wheat",amount:5200,status:"Delivered"}
+    ];
+
+    let farmers = [
+        {name:"Ramesh Patidar",location:"Indore, MP"},
+        {name:"Mohan Singh",location:"Dewas, MP"},
+        {name:"Suresh Verma",location:"Ujjain, MP"},
+        {name:"Rajesh Patel",location:"Bhopal, MP"},
+        {name:"Amit Sharma",location:"Dhar, MP"}
+    ];
+
+
+    // PAGE NAVIGATION
+
+    function showPage(page, element) {
+
+        document.querySelectorAll(".page").forEach(p => {
+            p.classList.remove("active");
+        });
+
+        document.getElementById(page).classList.add("active");
+
+        document.querySelectorAll(".nav-item").forEach(n => {
+            n.classList.remove("active");
+        });
+
+        if(element) {
+            element.classList.add("active");
+        } else {
+            document.querySelectorAll(".nav-item").forEach(n => {
+                if(n.getAttribute("onclick")?.includes(`'${page}'`)) {
+                    n.classList.add("active");
+                }
+            });
+        }
+
+        const titles = {
+            dashboard:"Dashboard Overview",
+            prices:"Crop Price Management",
+            inventory:"Product Inventory",
+            orders:"Order Management",
+            farmers:"Farmers Network",
+            analytics:"Business Analytics"
+        };
+
+        document.getElementById("pageTitle").innerText = titles[page];
+
+        document.getElementById("sidebar").classList.remove("open");
+
+        if(page === "analytics") {
+            setTimeout(renderAnalyticsChart, 50);
+        }
+    }
+
+
+    function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+    }
+
+
+    // CROP PRICES
+
+    function renderPrices() {
+
+        const search = (document.getElementById("priceSearch")?.value || "").toLowerCase();
+
+        const filtered = crops.filter(c =>
+            c.name.toLowerCase().includes(search)
+        );
+
+        document.getElementById("priceTable").innerHTML =
+            filtered.map(c => `
+                <tr>
+                    <td><strong>${escapeHTML(c.name)}</strong></td>
+                    <td>₹${c.price.toLocaleString("en-IN")}</td>
+                    <td>${escapeHTML(c.change)}</td>
+                    <td><span class="status available">${escapeHTML(c.status)}</span></td>
+                    <td>
+                        <button class="btn"
+                                onclick="changePrice('${escapeHTML(c.name)}')">
+                            Update
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+
+        document.getElementById("dashboardPrices").innerHTML =
+            crops.slice(0,4).map(c => `
+                <tr>
+                    <td>${escapeHTML(c.name)}</td>
+                    <td>₹${c.price.toLocaleString("en-IN")}</td>
+                    <td>${escapeHTML(c.change)}</td>
+                    <td><span class="status available">Available</span></td>
+                </tr>
+            `).join("");
+    }
+
+
+    function openPriceModal() {
+        document.getElementById("priceModal").classList.add("show");
+    }
+
+
+    function addCrop() {
+
+        const name = document.getElementById("cropName").value.trim();
+        const price = Number(document.getElementById("cropPrice").value);
+
+        if(!name || !Number.isFinite(price) || price <= 0) {
+            alert("Valid crop name aur price enter karein.");
+            return;
+        }
+
+        if(crops.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+            alert("Ye crop already listed hai.");
+            return;
+        }
+
+        crops.push({
+            name,
+            price,
+            change:"New",
+            status:"Available"
+        });
+
+        renderPrices();
+        updateStats();
+        closeModals();
+
+        document.getElementById("cropName").value = "";
+        document.getElementById("cropPrice").value = "";
+
+        alert("Crop successfully add ho gaya!");
+    }
+
+
+    function changePrice(name) {
+
+        const crop = crops.find(c => c.name === name);
+
+        if(!crop) return;
+
+        const newPrice = Number(prompt(
+            `New price for ${name}:`,
+            crop.price
+        ));
+
+        if(!Number.isFinite(newPrice) || newPrice <= 0) return;
+
+        crop.price = newPrice;
+        crop.change = "Updated";
+
+        renderPrices();
+
+        alert("Crop price update ho gayi!");
+    }
+
+
+    // INVENTORY
+
+    function renderProducts() {
+
+        document.getElementById("productGrid").innerHTML =
+            products.map((p,index) => `
+                <div class="product-card">
+
+                    <div class="product-icon">
+                        <i class="ti ${p.category === "Fertilizer" ? "ti-plant-2" : "ti-flask"}"></i>
+                    </div>
+
+                    <h3>${escapeHTML(p.name)}</h3>
+                    <p>${escapeHTML(p.category)}</p>
+
+                    <div class="product-price">₹${p.price}</div>
+
+                    <p>Stock: <strong>${p.stock} units</strong></p>
+
+                    <span class="status ${p.stock > 10 ? "available" : "pending"}">
+                        ${p.stock > 10 ? "In Stock" : "Low Stock"}
+                    </span>
+
+                    <button class="btn"
+                            style="width:100%;margin-top:15px"
+                            onclick="updateStock(${index})">
+                        Update Stock
+                    </button>
+
+                </div>
+            `).join("");
+    }
+
+
+    function openProductModal() {
+        document.getElementById("productModal").classList.add("show");
+    }
+
+
+    function addProduct() {
+
+        const name = document.getElementById("newProduct").value.trim();
+        const category = document.getElementById("newCategory").value;
+        const price = Number(document.getElementById("newProductPrice").value);
+        const stock = Number(document.getElementById("newStock").value);
+
+        if(!name || !Number.isFinite(price) || price <= 0 ||
+           !Number.isInteger(stock) || stock < 0) {
+            alert("Please valid product details enter karein.");
+            return;
+        }
+
+        products.push({name,category,price,stock});
+
+        renderProducts();
+        updateStats();
+        closeModals();
+
+        document.getElementById("newProduct").value = "";
+        document.getElementById("newProductPrice").value = "";
+        document.getElementById("newStock").value = "";
+
+        alert("Product successfully add ho gaya!");
+    }
+
+
+    function updateStock(index) {
+
+        const stock = prompt("Enter new stock quantity:");
+
+        if(stock === null || stock.trim() === "") return;
+
+        const value = Number(stock);
+
+        if(!Number.isInteger(value) || value < 0) {
+            alert("Valid stock quantity enter karein.");
+            return;
+        }
+
+        products[index].stock = value;
+
+        renderProducts();
+    }
+
+
+    // ORDERS
+
+    function renderOrders() {
+
+        const search = (document.getElementById("orderSearch")?.value || "").toLowerCase();
+
+        const filtered = orders.filter(o =>
+            o.farmer.toLowerCase().includes(search) ||
+            o.id.toLowerCase().includes(search)
+        );
+
+        document.getElementById("orderTable").innerHTML =
+            filtered.length ? filtered.map(o => `
+                <tr>
+                    <td><strong>${escapeHTML(o.id)}</strong></td>
+                    <td>${escapeHTML(o.farmer)}</td>
+                    <td>${escapeHTML(o.product)}</td>
+                    <td>₹${o.amount.toLocaleString("en-IN")}</td>
+
+                    <td>
+                        <span class="status ${getStatusClass(o.status)}">
+                            ${escapeHTML(o.status)}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${o.status !== "Delivered" ? `
+                            <button class="btn"
+                                    onclick="updateOrder('${escapeHTML(o.id)}')">
+                                Update
+                            </button>
+                        ` : "Completed"}
+                    </td>
+                </tr>
+            `).join("") :
+            `<tr><td colspan="6" class="empty">No orders found.</td></tr>`;
+    }
+
+
+    function getStatusClass(status) {
+
+        if(status === "Delivered") return "delivered";
+
+        if(status === "Pending") return "pending";
+
+        return "available";
+    }
+
+
+    function updateOrder(id) {
+
+        const order = orders.find(o => o.id === id);
+
+        if(!order) return;
+
+        if(order.status === "Pending") {
+            order.status = "Processing";
+        } else if(order.status === "Processing") {
+            order.status = "Delivered";
+        }
+
+        renderOrders();
+        renderRecentOrders();
+        updateStats();
+    }
+
+
+    // FARMERS
+
+    function renderFarmers() {
+
+        document.getElementById("farmerList").innerHTML =
+            farmers.map(f => `
+                <div class="farmer-row">
+
+                    <div class="farmer-info">
+
+                        <div class="farmer-avatar">
+                            <i class="ti ti-user"></i>
+                        </div>
+
+                        <div>
+                            <h4>${escapeHTML(f.name)}</h4>
+                            <p>${escapeHTML(f.location)}</p>
+                        </div>
+
+                    </div>
+
+                    <span class="status available">Connected</span>
+
+                </div>
+            `).join("");
+    }
+
+
+    // RECENT ORDERS
+
+    function renderRecentOrders() {
+
+        document.getElementById("recentOrders").innerHTML =
+            orders.slice(0,4).map(o => `
+                <div class="farmer-row">
+
+                    <div>
+                        <strong style="font-size:12px">${escapeHTML(o.farmer)}</strong>
+                        <p style="font-size:10px;color:var(--muted);margin-top:5px">
+                            ${escapeHTML(o.product)}
+                        </p>
+                    </div>
+
+                    <span class="status ${getStatusClass(o.status)}">
+                        ${escapeHTML(o.status)}
+                    </span>
+
+                </div>
+            `).join("");
+    }
+
+
+    // ANALYTICS
+
+    let revenueChartInstance;
+    let analyticsChartInstance;
+
+    function makeChart(canvasId, existingChart) {
+
+        const canvas = document.getElementById(canvasId);
+
+        if(!canvas) return existingChart;
+
+        if(existingChart) existingChart.destroy();
+
+        return new Chart(canvas, {
+            type:"line",
+
+            data:{
+                labels:["Jan","Feb","Mar","Apr","May","Jun","Jul"],
+
+                datasets:[{
+                    label:"Revenue (₹)",
+                    data:[12000,19000,15000,25000,22000,35000,42000],
+                    borderColor:"#168653",
+                    backgroundColor:"rgba(22,134,83,.10)",
+                    fill:true,
+                    tension:.4,
+                    borderWidth:2
+                }]
+            },
+
+            options:{
+                responsive:true,
+                plugins:{
+                    legend:{display:false}
+                },
+                scales:{
+                    y:{
+                        beginAtZero:true,
+                        grid:{color:"#edf1ed"}
+                    },
+                    x:{
+                        grid:{display:false}
+                    }
+                }
+            }
+        });
+    }
+
+
+    function renderAnalyticsChart() {
+        analyticsChartInstance = makeChart(
+            "analyticsChart",
+            analyticsChartInstance
+        );
+    }
+
+
+    // STATS
+
+    function updateStats() {
+
+        document.getElementById("orderCount").innerText = orders.length;
+        document.getElementById("productCount").innerText = products.length;
+        document.getElementById("farmerCount").innerText = farmers.length + 121;
+
+        document.getElementById("analyticsOrders").innerText = orders.length;
+        document.getElementById("analyticsRevenue").innerText = "₹1,25,000";
+    }
+
+
+    // MODALS
+
+    function closeModals() {
+
+        document.querySelectorAll(".modal").forEach(m => {
+            m.classList.remove("show");
+        });
+    }
+
+
+    document.querySelectorAll(".modal").forEach(modal => {
+
+        modal.addEventListener("click", function(e) {
+
+            if(e.target === modal) {
+                closeModals();
+            }
+
+        });
+
+    });
+
+
+    // BASIC HTML ESCAPING
+
+    function escapeHTML(value) {
+
+        return String(value).replace(/[&<>"']/g, char => ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            '"':"&quot;",
+            "'":"&#39;"
+        })[char]);
+    }
+
+
+    // INITIALIZE
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        renderPrices();
+        renderProducts();
+        renderOrders();
+        renderFarmers();
+        renderRecentOrders();
+        updateStats();
+
+        revenueChartInstance = makeChart(
+            "revenueChart",
+            revenueChartInstance
+        );
+
+    });
+
+</script>
 
 </body>
 </html>

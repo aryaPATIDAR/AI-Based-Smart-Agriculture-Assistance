@@ -1,0 +1,10 @@
+.env
+.venv/
+.idea/
+__pycache__/
+**/__pycache__/
+*.pyc
+kisansmart.db
+data/
+static/uploads/
+test_images/
